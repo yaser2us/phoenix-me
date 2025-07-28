@@ -9,6 +9,26 @@ export const config = {
       apiKey: process.env.WEATHER_API_KEY,
       timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
       retries: parseInt(process.env.MAX_RETRIES) || 3
+    },
+    currency: {
+      // No API key required for ExchangeRate-API free tier
+      timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
+      retries: parseInt(process.env.MAX_RETRIES) || 3
+    },
+    facts: {
+      // No API key required
+      timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
+      retries: parseInt(process.env.MAX_RETRIES) || 3
+    },
+    geolocation: {
+      // No API key required for ipapi.co free tier
+      timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
+      retries: parseInt(process.env.MAX_RETRIES) || 3
+    },
+    news: {
+      apiKey: process.env.NEWS_API_KEY,
+      timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
+      retries: parseInt(process.env.MAX_RETRIES) || 3
     }
   },
   server: {
@@ -92,7 +112,12 @@ export function isApiConfigured(apiName) {
   
   switch (apiName) {
     case 'weather':
+    case 'news':
       return !!(apiConfig && apiConfig.apiKey);
+    case 'currency':
+    case 'geolocation':
+    case 'facts':
+      return !!(apiConfig && Object.keys(apiConfig).length > 0);
     default:
       return !!(apiConfig && Object.keys(apiConfig).length > 0);
   }

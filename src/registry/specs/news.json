@@ -1,0 +1,156 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "News API",
+    "description": "News headlines and articles API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://newsapi.org/v2",
+      "description": "NewsAPI.org"
+    }
+  ],
+  "paths": {
+    "/top-headlines": {
+      "get": {
+        "operationId": "getTopHeadlines",
+        "summary": "Get top headlines",
+        "description": "Get the latest top news headlines",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "description": "2-letter ISO country code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}$",
+              "example": "us"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "description": "News category",
+            "schema": {
+              "type": "string",
+              "enum": ["business", "entertainment", "general", "health", "science", "sports", "technology"]
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "required": true,
+            "description": "Your API key from newsapi.org",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News headlines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "totalResults": {"type": "integer"},
+                    "articles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {"type": "string"},
+                          "description": {"type": "string"},
+                          "url": {"type": "string"},
+                          "publishedAt": {"type": "string"},
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "name": {"type": "string"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/everything": {
+      "get": {
+        "operationId": "searchNews",
+        "summary": "Search news articles",
+        "description": "Search for news articles by keyword",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Keywords or phrases to search for",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "description": "Language code",
+            "schema": {
+              "type": "string",
+              "enum": ["ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt", "ru", "sv", "ud", "zh"],
+              "default": "en"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "required": true,
+            "description": "Your API key from newsapi.org",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "totalResults": {"type": "integer"},
+                    "articles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {"type": "string"},
+                          "description": {"type": "string"},
+                          "content": {"type": "string"},
+                          "url": {"type": "string"},
+                          "publishedAt": {"type": "string"},
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "name": {"type": "string"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Exchange Rate API",
+    "description": "Free currency exchange rate API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.exchangerate-api.com/v4",
+      "description": "ExchangeRate-API"
+    }
+  ],
+  "paths": {
+    "/latest/{base}": {
+      "get": {
+        "operationId": "getExchangeRates",
+        "summary": "Get latest exchange rates for base currency",
+        "description": "Get current exchange rates for a base currency",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "required": true,
+            "description": "Base currency code (USD, EUR, etc.)",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$",
+              "example": "USD"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exchange rates data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "base": {"type": "string"},
+                    "date": {"type": "string"},
+                    "rates": {
+                      "type": "object",
+                      "additionalProperties": {"type": "number"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

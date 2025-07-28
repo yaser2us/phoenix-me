@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IP Geolocation API",
+    "description": "Get location data from IP addresses",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://ipapi.co",
+      "description": "ipapi.co"
+    }
+  ],
+  "paths": {
+    "/{ip}/json": {
+      "get": {
+        "operationId": "getLocationByIP",
+        "summary": "Get location data for specific IP",
+        "description": "Get geographic location data for a specific IP address",
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "path",
+            "required": true,
+            "description": "IP address to lookup",
+            "schema": {
+              "type": "string",
+              "example": "8.8.8.8"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ip": {"type": "string"},
+                    "city": {"type": "string"},
+                    "region": {"type": "string"},
+                    "country": {"type": "string"},
+                    "country_name": {"type": "string"},
+                    "timezone": {"type": "string"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/json": {
+      "get": {
+        "operationId": "getCurrentLocation",
+        "summary": "Get current user's location",
+        "description": "Get the current user's geographic location based on their IP",
+        "responses": {
+          "200": {
+            "description": "Current location data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ip": {"type": "string"},
+                    "city": {"type": "string"},
+                    "region": {"type": "string"},
+                    "country_name": {"type": "string"},
+                    "timezone": {"type": "string"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

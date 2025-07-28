@@ -1,0 +1,55 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Random Facts API",
+    "description": "Get random interesting facts",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://uselessfacts.jsph.pl",
+      "description": "Useless Facts API"
+    }
+  ],
+  "paths": {
+    "/random.json": {
+      "get": {
+        "operationId": "getRandomFact",
+        "summary": "Get a random interesting fact",
+        "description": "Retrieve a random interesting fact",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "description": "Language code",
+            "schema": {
+              "type": "string",
+              "enum": ["en", "de"],
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Random fact data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "text": {"type": "string"},
+                    "source": {"type": "string"},
+                    "source_url": {"type": "string"},
+                    "language": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

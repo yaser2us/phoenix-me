@@ -252,4 +252,237 @@ export class IntentParser {
       timestamp: new Date().toISOString()
     };
   }
+
+  // PHASE 2: Multi-API support methods
+  buildApiKeywords() {
+    return {
+      weather: ['weather', 'temperature', 'forecast', 'climate', 'rain', 'sunny', 'temp', 'conditions'],
+      currency: ['currency', 'exchange', 'convert', 'rate', 'dollar', 'euro', 'money', 'usd', 'eur', 'gbp'],
+      news: ['news', 'headlines', 'articles', 'breaking', 'latest', 'today', 'current events', 'journalism'],
+      geolocation: ['location', 'ip', 'where', 'country', 'city', 'geolocation', 'current location', 'my location'],
+      facts: ['fact', 'random', 'interesting', 'trivia', 'knowledge', 'learn', 'tell me']
+    };
+  }
+
+  categorizeIntent(userInput) {
+    const keywords = this.buildApiKeywords();
+    const normalizedInput = userInput.toLowerCase();
+    const scores = {};
+
+    // Calculate keyword match scores for each API
+    for (const [apiType, apiKeywords] of Object.entries(keywords)) {
+      scores[apiType] = 0;
+      for (const keyword of apiKeywords) {
+        if (normalizedInput.includes(keyword)) {
+          scores[apiType] += 1;
+        }
+      }
+    }
+
+    // Find the highest scoring API type
+    let bestApi = null;
+    let bestScore = 0;
+    for (const [apiType, score] of Object.entries(scores)) {
+      if (score > bestScore) {
+        bestApi = apiType;
+        bestScore = score;
+      }
+    }
+
+    // Calculate confidence based on score
+    const totalWords = normalizedInput.split(/\s+/).length;
+    const confidence = bestScore > 0 ? Math.min(bestScore / totalWords * 2, 1.0) : 0;
+
+    return {
+      apiType: bestApi,
+      confidence: confidence,
+      scores: scores
+    };
+  }
+
+  extractCurrencyParameters(userInput) {
+    const params = {};
+    const normalizedInput = userInput.toLowerCase();
+
+    // Extract currency conversion parameters
+    const conversionPattern = /convert\s+(\d+)?\s*([a-z]{3})\s+to\s+([a-z]{3})/i;
+    const ratePattern = /(?:exchange\s+rate|rate)\s+(?:for\s+)?([a-z]{3})/i;
+    const basePattern = /([a-z]{3})\s+(?:to|exchange|rate)/i;
+
+    let match = normalizedInput.match(conversionPattern);
+    if (match) {
+      if (match[1]) params.amount = parseInt(match[1]);
+      params.from = match[2].toUpperCase();
+      params.to = match[3].toUpperCase();
+      params.base = params.from;
+      return params;
+    }
+
+    match = normalizedInput.match(ratePattern);
+    if (match) {
+      params.base = match[1].toUpperCase();
+      return params;
+    }
+
+    match = normalizedInput.match(basePattern);
+    if (match) {
+      params.base = match[1].toUpperCase();
+      return params;
+    }
+
+    // Default to USD if no currency specified
+    params.base = 'USD';
+    return params;
+  }
+
+  extractLocationParameters(userInput) {
+    const params = {};
+    const normalizedInput = userInput.toLowerCase();
+
+    // Extract IP address if provided
+    const ipPattern = /(?:ip\s+|location\s+of\s+)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+    const match = normalizedInput.match(ipPattern);
+    
+    if (match) {
+      params.ip = match[1];
+      return params;
+    }
+
+    // For "where am I" or "current location", no parameters needed
+    if (normalizedInput.includes('where am i') || 
+        normalizedInput.includes('current location') ||
+        normalizedInput.includes('my location')) {
+      return {}; // Will use getCurrentLocation endpoint
+    }
+
+    return {};
+  }
+
+  extractNewsParameters(userInput) {
+    const params = {};
+    const normalizedInput = userInput.toLowerCase();
+
+    // Extract country parameter
+    const countryPattern = /(?:news\s+from|headlines\s+from|from)\s+([a-z]{2}|us|uk|ca|au|de|fr|jp|cn)/i;
+    let match = normalizedInput.match(countryPattern);
+    if (match) {
+      params.country = match[1].toLowerCase();
+    }
+
+    // Extract category parameter
+    const categoryPattern = /(?:about|on)\s+(business|entertainment|general|health|science|sports|technology)/i;
+    match = normalizedInput.match(categoryPattern);
+    if (match) {
+      params.category = match[1].toLowerCase();
+    }
+
+    // Extract search query for searchNews operation
+    const searchPattern = /(?:news\s+about|search\s+news|find\s+news|news\s+on)\s+(.+)/i;
+    match = normalizedInput.match(searchPattern);
+    if (match) {
+      params.q = match[1].trim();
+      return params; // This should use searchNews operation
+    }
+
+    // Default parameters for top headlines
+    if (!params.country) {
+      params.country = 'us';
+    }
+
+    return params;
+  }
+
+  // Enhanced parseIntent method with multi-API support
+  parseIntentEnhanced(userInput) {
+    try {
+      const normalizedInput = this.normalizeInput(userInput);
+      console.error(`Parsing intent: "${userInput}" -> "${normalizedInput}"`);
+      
+      // First, categorize the intent to determine API type
+      const categorization = this.categorizeIntent(normalizedInput);
+      
+      let operationId = null;
+      let extractedParams = {};
+      
+      // Route based on API type
+      switch (categorization.apiType) {
+        case 'weather':
+          operationId = this.registry.findOperationByIntent(normalizedInput);
+          if (operationId) {
+            const operationDetails = this.registry.getOperationDetails(operationId);
+            extractedParams = this.extractParameters(normalizedInput, operationDetails);
+          }
+          break;
+          
+        case 'currency':
+          operationId = 'getExchangeRates';
+          extractedParams = this.extractCurrencyParameters(normalizedInput);
+          break;
+          
+        case 'news':
+          const newsParams = this.extractNewsParameters(normalizedInput);
+          if (newsParams.q) {
+            operationId = 'searchNews';
+          } else {
+            operationId = 'getTopHeadlines';
+          }
+          extractedParams = newsParams;
+          break;
+          
+        case 'geolocation':
+          if (normalizedInput.includes('where am i') || 
+              normalizedInput.includes('current location') ||
+              normalizedInput.includes('my location')) {
+            operationId = 'getCurrentLocation';
+          } else {
+            operationId = 'getLocationByIP';
+          }
+          extractedParams = this.extractLocationParameters(normalizedInput);
+          break;
+          
+        case 'facts':
+          operationId = 'getRandomFact';
+          extractedParams = { language: 'en' };
+          break;
+          
+        default:
+          // Fallback to original weather-only logic
+          operationId = this.registry.findOperationByIntent(normalizedInput);
+          if (operationId) {
+            const operationDetails = this.registry.getOperationDetails(operationId);
+            extractedParams = this.extractParameters(normalizedInput, operationDetails);
+          }
+      }
+
+      if (!operationId) {
+        return {
+          success: false,
+          error: 'Could not understand the request. Try asking for weather, currency rates, location, or random facts.',
+          suggestions: [
+            'Get weather for London',
+            'Convert USD to EUR', 
+            'Where am I?',
+            'Tell me a random fact'
+          ]
+        };
+      }
+
+      return {
+        success: true,
+        operationId: operationId,
+        parameters: extractedParams,
+        apiType: categorization.apiType,
+        confidence: Math.max(categorization.confidence, 0.5),
+        originalInput: userInput,
+        normalizedInput: normalizedInput
+      };
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to parse intent: ${error.message}`,
+        originalInput: userInput
+      };
+    }
+  }
 }
