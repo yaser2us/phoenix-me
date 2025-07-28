@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Weather API",
+    "description": "OpenWeatherMap current weather API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.openweathermap.org/data/2.5",
+      "description": "OpenWeatherMap API"
+    }
+  ],
+  "paths": {
+    "/weather": {
+      "get": {
+        "operationId": "getCurrentWeather",
+        "summary": "Get current weather for a location",
+        "description": "Returns current weather data for specified location",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "City name, state code and country code divided by comma",
+            "schema": {
+              "type": "string",
+              "example": "London,UK"
+            }
+          },
+          {
+            "name": "appid",
+            "in": "query", 
+            "required": true,
+            "description": "API key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "required": false,
+            "description": "Temperature unit",
+            "schema": {
+              "type": "string",
+              "enum": ["standard", "metric", "imperial"],
+              "default": "metric"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "coord": {
+                      "type": "object",
+                      "properties": {
+                        "lon": {"type": "number"},
+                        "lat": {"type": "number"}
+                      }
+                    },
+                    "weather": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "integer"},
+                          "main": {"type": "string"},
+                          "description": {"type": "string"},
+                          "icon": {"type": "string"}
+                        }
+                      }
+                    },
+                    "main": {
+                      "type": "object",
+                      "properties": {
+                        "temp": {"type": "number"},
+                        "feels_like": {"type": "number"},
+                        "temp_min": {"type": "number"},
+                        "temp_max": {"type": "number"},
+                        "pressure": {"type": "integer"},
+                        "humidity": {"type": "integer"}
+                      }
+                    },
+                    "name": {"type": "string"}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "City not found"
+          },
+          "401": {
+            "description": "Invalid API key"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "appid"
+      }
+    }
+  }
+}
