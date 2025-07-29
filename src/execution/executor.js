@@ -54,6 +54,16 @@ export class ApiExecutor {
       // Execute HTTP request with proper error handling
       const apiResponse = await this.makeHttpRequest(requestConfig);
       
+      // Log raw API response using logger instead of console.log
+      if (isMaybankOperation) {
+        logger.debug('RAW MAYBANK API RESPONSE', {
+          operationId: operationId,
+          status: apiResponse.status,
+          headers: apiResponse.headers,
+          data: apiResponse.data
+        });
+      }
+
       // Format response for MCP return
       let formattedResponse;
       if (isMaybankOperation) {
@@ -85,11 +95,50 @@ export class ApiExecutor {
 
   async makeHttpRequest(requestConfig) {
     try {
-      console.error(`Making HTTP request: ${requestConfig.method.toUpperCase()} ${requestConfig.url}`);
+      logger.info('Making HTTP request', {
+        method: requestConfig.method?.toUpperCase(),
+        url: requestConfig.url,
+        hasAuth: !!(requestConfig.headers?.Authorization || requestConfig.headers?.authorization),
+        headerCount: Object.keys(requestConfig.headers || {}).length,
+        hasBody: !!requestConfig.data
+      });
+      
+      // Log full request details in debug mode
+      if (process.env.LOG_LEVEL === 'debug' && process.env.FULL_DEBUG === 'true') {
+        logger.debug('Full request details (DEBUG MODE)', {
+          method: requestConfig.method,
+          url: requestConfig.url,
+          headers: requestConfig.headers,
+          data: requestConfig.data,
+          params: requestConfig.params
+        });
+      }
       
       const response = await this.httpClient.request(requestConfig);
       
-      console.error(`HTTP response received: ${response.status}`);
+      logger.info('HTTP response received', {
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers?.['content-type'],
+        contentLength: response.headers?.['content-length'],
+        hasData: !!response.data
+      });
+      
+      // Log response data for debugging (be careful with sensitive data)
+      if (response.data) {
+        logger.debug('Response data preview', {
+          dataType: typeof response.data,
+          dataKeys: typeof response.data === 'object' ? Object.keys(response.data) : 'non-object',
+          dataLength: typeof response.data === 'string' ? response.data.length : 'non-string'
+        });
+        
+        // If in debug mode, log the full response (be careful with sensitive data in production)
+        if (process.env.LOG_LEVEL === 'debug' && process.env.FULL_DEBUG === 'true') {
+          logger.debug('Full response data (DEBUG MODE)', {
+            fullData: response.data
+          });
+        }
+      }
       
       return {
         status: response.status,
@@ -99,6 +148,18 @@ export class ApiExecutor {
       };
       
     } catch (error) {
+      // Log detailed error information
+      logger.error('HTTP request failed', {
+        errorCode: error.code,
+        errorMessage: error.message,
+        hasResponse: !!error.response,
+        responseStatus: error.response?.status,
+        responseStatusText: error.response?.statusText,
+        responseData: error.response?.data,
+        requestUrl: requestConfig.url,
+        requestMethod: requestConfig.method
+      });
+      
       // Handle different types of HTTP errors
       if (error.code === 'ECONNABORTED') {
         throw new Error('API request timeout - service may be down');
@@ -109,9 +170,17 @@ export class ApiExecutor {
         const status = error.response.status;
         const data = error.response.data;
         
+        // Log the actual response data for debugging
+        logger.error('Server error response', {
+          status: status,
+          statusText: error.response.statusText,
+          headers: error.response.headers,
+          data: data
+        });
+        
         switch (status) {
           case 401:
-            throw new Error('API authentication failed - check API key');
+            throw new Error('API authentication failed - check API key or JWT token');
           case 404:
             throw new Error('Requested resource not found');
           case 429:
@@ -253,23 +322,26 @@ export class ApiExecutor {
     return operationDetails.spec && 
            operationDetails.spec.servers && 
            operationDetails.spec.servers.some(server => 
-             server.url && server.url.includes('staging.maya.maybank2u.com.my')
+             server.url && (server.url.includes('maya.maybank2u.com.my') || server.url.includes('staging.maya.maybank2u.com.my'))
            );
   }
 
   // Prepare Maybank-specific request
   async prepareMaybankRequest(operationId, userParameters, options) {
     try {
-      // Validate JWT token is provided
+      // JWT token is now optional - adapter will use default if not provided
       const jwtToken = options.jwtToken;
+      
       if (!jwtToken) {
-        throw new Error('JWT token is required for Maybank API operations. Please provide a valid Maybank JWT token.');
+        logger.info('No JWT token provided, using default token');
       }
 
-      // Validate JWT token format
-      const tokenValidation = await this.jwtManager.validateMaybankToken(jwtToken);
-      if (!tokenValidation.isValid) {
-        throw new Error(`Invalid JWT token: ${tokenValidation.reason}`);
+      // Validate JWT token format only if provided
+      if (jwtToken) {
+        const tokenValidation = await this.jwtManager.validateMaybankToken(jwtToken);
+        if (!tokenValidation.isValid) {
+          throw new Error(`Invalid JWT token: ${tokenValidation.reason}`);
+        }
       }
 
       // Prepare request using Maybank adapter

@@ -1,6 +1,8 @@
 import { logger } from '../utils/logger.js';
 import { MaybankParameterCollector } from './maybank-parameter-collector.js';
 import { MaybankWorkflows } from '../workflows/maybank-workflows.js';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * Maybank Interactive Tool for Phase 4.2 Checkpoint 3
@@ -15,8 +17,9 @@ import { MaybankWorkflows } from '../workflows/maybank-workflows.js';
  * - Enhanced user experience with progress tracking
  */
 export class MaybankInteractiveTool {
-  constructor(registry) {
+  constructor(registry, executor = null) {
     this.registry = registry;
+    this.executor = executor;
     this.parameterCollector = new MaybankParameterCollector();
     this.maybankWorkflows = new MaybankWorkflows();
     
@@ -99,7 +102,18 @@ export class MaybankInteractiveTool {
     };
 
     this.initialized = true;
-    logger.info('Maybank Interactive Tool initialized');
+    logger.info('Maybank Interactive Tool initialized', {
+      hasExecutor: !!executor
+    });
+  }
+
+  /**
+   * Set the API executor after initialization
+   * @param {Object} executor - API executor instance
+   */
+  setExecutor(executor) {
+    this.executor = executor;
+    logger.info('API executor set for Maybank Interactive Tool');
   }
 
   /**
@@ -356,7 +370,7 @@ export class MaybankInteractiveTool {
       }
 
       // Format successful result
-      return this.formatExecutionResult(result, session, allParameters);
+      return await this.formatExecutionResult(result, session, allParameters);
 
     } catch (error) {
       logger.error('Session execution failed', { 
@@ -554,9 +568,9 @@ export class MaybankInteractiveTool {
    * @param {Object} result - Execution result
    * @param {Object} session - Session object
    * @param {Object} parameters - All collected parameters
-   * @returns {Object} Formatted result
+   * @returns {Promise<Object>} Formatted result
    */
-  formatExecutionResult(result, session, parameters) {
+  async formatExecutionResult(result, session, parameters) {
     let content = `🏦 **Maybank Operation Completed**\n\n`;
     
     if (session.type === 'workflow') {
@@ -566,8 +580,15 @@ export class MaybankInteractiveTool {
       content += `✅ **Operation:** ${session.operationId}\n`;
     }
 
-    content += `**Status:** Success\n`;
-    content += `**Execution Time:** ${new Date().toISOString()}\n\n`;
+    content += `**Status:** ${result.success ? 'Success' : 'Failed'}\n`;
+    content += `**Execution Time:** ${new Date().toISOString()}\n`;
+    
+    // Add API type if available
+    if (result.apiType) {
+      content += `**API Type:** ${result.apiType}\n`;
+    }
+
+    content += `\n`;
 
     // Add parameters summary (hide sensitive data)
     content += `**Parameters Used:**\n`;
@@ -579,14 +600,72 @@ export class MaybankInteractiveTool {
 
     content += `\n`;
 
+    // Add result data if available  
+    if (result && result.data) {
+      if (session.type === 'operation') {
+        content += this.formatOperationResults(session.operationId, result.data);
+      } else if (session.type === 'workflow') {
+        content += this.formatWorkflowResults(session.workflowName, result.data);
+      }
+      content += `\n`;
+    }
+
     // Add result summary if available
     if (result && result.summary) {
       content += `**Result Summary:**\n${result.summary}\n\n`;
     }
 
-    // Add workflow-specific result formatting
-    if (session.type === 'workflow' && result && result.data) {
-      content += this.formatWorkflowResults(session.workflowName, result.data);
+    // Add warnings if there were API failures
+    if (result && result.warnings && result.warnings.length > 0) {
+      content += `⚠️  **API Warnings:**\n`;
+      result.warnings.forEach(warning => {
+        content += `• ${warning}\n`;
+      });
+      content += `\n`;
+    }
+
+    // Add detailed error information for debugging
+    if (result && result.detailedErrors && result.detailedErrors.length > 0) {
+      content += `🔍 **Detailed API Error Information:**\n`;
+      
+      // Log errors to file for debugging
+      await this.logErrorsToFile(result.detailedErrors, session.sessionId);
+      
+      result.detailedErrors.forEach((errorDetail, index) => {
+        content += `\n**${index + 1}. ${errorDetail.api}**\n`;
+        content += `• Endpoint: ${errorDetail.endpoint}\n`;
+        content += `• HTTP Status: ${errorDetail.httpStatus} ${errorDetail.httpStatusText || ''}\n`;
+        content += `• Error: ${errorDetail.error}\n`;
+        content += `• Duration: ${errorDetail.duration}ms\n`;
+        content += `• Timestamp: ${errorDetail.timestamp}\n`;
+        
+        if (errorDetail.responseBody) {
+          // Limit response body to first 500 characters for readability
+          const responsePreview = typeof errorDetail.responseBody === 'string' 
+            ? errorDetail.responseBody.substring(0, 500)
+            : JSON.stringify(errorDetail.responseBody).substring(0, 500);
+          content += `• Response Body: ${responsePreview}${responsePreview.length >= 500 ? '...' : ''}\n`;
+        }
+        
+        if (errorDetail.responseHeaders) {
+          content += `• Response Headers: ${JSON.stringify(errorDetail.responseHeaders, null, 2)}\n`;
+        }
+      });
+      
+      content += `\n📁 **Error Log:** Complete API error details saved to maybank-api-errors.log\n\n`;
+    }
+
+    // Add API status information if available for workflows
+    if (session.type === 'workflow' && result && result.data && result.data.apiStatus) {
+      content += `**API Call Status:**\n`;
+      content += `• MAE Balance: ${result.data.apiStatus.maeBalance === 'success' ? '✅' : '❌'} ${result.data.apiStatus.maeBalance}\n`;
+      content += `• Account Summary: ${result.data.apiStatus.accountSummary === 'success' ? '✅' : '❌'} ${result.data.apiStatus.accountSummary}\n`;
+      content += `• All Accounts: ${result.data.apiStatus.allAccounts === 'success' ? '✅' : '❌'} ${result.data.apiStatus.allAccounts}\n`;
+      
+      if (result.data.apiStatus.failedSteps.length > 0) {
+        content += `\n⚠️  **Failed API Calls:** ${result.data.apiStatus.failedSteps.join(', ')}\n`;
+      }
+      content += `\n`;
     }
 
     content += `\n*Interactive session completed successfully.*`;
@@ -622,21 +701,126 @@ export class MaybankInteractiveTool {
     }
   }
 
+  /**
+   * Format operation-specific results
+   * @param {string} operationId - Operation ID
+   * @param {Object} data - Result data
+   * @returns {string} Formatted operation results
+   */
+  formatOperationResults(operationId, data) {
+    let content = '';
+    
+    switch (operationId) {
+      case 'get_banking_getBalance':
+        if (data.account) {
+          content += `**MAE Wallet Balance:**\n`;
+          content += `• Account: ${data.account.name || 'MAE Wallet'}\n`;
+          content += `• Balance: RM ${data.account.balance || '0.00'}\n`;
+          if (data.account.value !== undefined) {
+            content += `• Value: ${data.account.value}\n`;
+          }
+        } else {
+          // Fallback: show raw data if expected structure not found
+          content += `**MAE Wallet Balance (Raw Data):**\n`;
+          content += `\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
+        }
+        break;
+        
+      case 'get_banking_summary':
+        if (data.summary) {
+          content += `**Account Summary:**\n`;
+          content += `• Total Balance: RM ${data.summary.totalBalance || '0.00'}\n`;
+          content += `• Number of Accounts: ${data.summary.accountCount || 0}\n`;
+          content += `• MAE Available: ${data.summary.maeAvailable ? 'Yes' : 'No'}\n`;
+        }
+        if (data.accounts && data.accounts.length > 0) {
+          content += `\n**Accounts:**\n`;
+          data.accounts.forEach(acc => {
+            content += `• ${acc.name}: RM ${acc.balance}\n`;
+          });
+        }
+        break;
+        
+      case 'get_banking_all':
+        if (data.accounts && data.accounts.length > 0) {
+          content += `**All Accounts:**\n`;
+          data.accounts.forEach(acc => {
+            content += `• ${acc.name} (${acc.type || acc.accountType}): RM ${acc.balance}\n`;
+            if (acc.number) {
+              content += `  Account Number: ${acc.number}\n`;
+            }
+            content += `  Status: ${acc.active ? 'Active' : 'Inactive'}\n`;
+          });
+        }
+        if (data.summary) {
+          content += `\n**Summary:**\n`;
+          content += `• Total Accounts: ${data.summary.totalAccounts || 0}\n`;
+          content += `• Active Accounts: ${data.summary.activeAccounts || 0}\n`;
+        }
+        break;
+        
+      default:
+        content += `**Results:**\n${JSON.stringify(data, null, 2)}`;
+    }
+    
+    // If no content was generated, show the raw data
+    if (!content.trim()) {
+      content = `**Operation Results:**\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
+    }
+    
+    // Always add raw response data for debugging
+    content += `\n**Raw Response Data (Debug):**\n`;
+    content += `\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
+    
+    return content;
+  }
+
   formatFinancialOverview(data) {
     let content = `**📊 Financial Overview:**\n`;
     if (data.overview) {
-      content += `• Total Balance: RM ${data.overview.totalBalance}\n`;
-      content += `• Accounts: ${data.overview.accountCount}\n`;
+      content += `• Total Balance: RM ${data.overview.totalBalance || '0.00'}\n`;
+      content += `• Accounts: ${data.overview.accountCount || 0}\n`;
       content += `• MAE Available: ${data.overview.maeAvailable ? 'Yes' : 'No'}\n`;
     }
+    if (data.maeWallet) {
+      content += `\n**MAE Wallet:**\n`;
+      content += `• Balance: RM ${data.maeWallet.balance || '0.00'}\n`;
+    }
+    if (data.insights && data.insights.length > 0) {
+      content += `\n**Insights:**\n`;
+      data.insights.forEach(insight => {
+        content += `• ${insight}\n`;
+      });
+    }
+    
+    // Add raw responses for debugging
+    if (data.rawResponses) {
+      content += `\n**Raw API Responses (Debug):**\n`;
+      content += `\`\`\`json\n${JSON.stringify(data.rawResponses, null, 2)}\n\`\`\`\n`;
+    }
+    
     return content;
   }
 
   formatMaeAnalysis(data) {
     let content = `**💳 MAE Wallet Analysis:**\n`;
     if (data.maeWallet) {
-      content += `• Current Balance: ${data.maeWallet.currentBalance}\n`;
-      content += `• Account: ${data.maeWallet.accountName}\n`;
+      content += `• Current Balance: RM ${data.maeWallet.currentBalance || '0.00'}\n`;
+      content += `• Account: ${data.maeWallet.accountName || 'MAE Wallet'}\n`;
+      if (data.maeWallet.balanceValue !== undefined) {
+        content += `• Balance Value: ${data.maeWallet.balanceValue}\n`;
+      }
+    }
+    if (data.context) {
+      content += `\n**Context:**\n`;
+      content += `• Total Across All Accounts: RM ${data.context.totalAcrossAllAccounts || '0.00'}\n`;
+      content += `• MAE Percentage: ${data.context.maePercentage || 0}%\n`;
+    }
+    if (data.insights && data.insights.length > 0) {
+      content += `\n**Insights:**\n`;
+      data.insights.forEach(insight => {
+        content += `• ${insight}\n`;
+      });
     }
     return content;
   }
@@ -653,6 +837,13 @@ export class MaybankInteractiveTool {
     if (data.balance) {
       content += `• ${data.displayText}\n`;
     }
+    
+    // Add raw response for debugging
+    if (data.rawResponse) {
+      content += `\n**Raw API Response (Debug):**\n`;
+      content += `\`\`\`json\n${JSON.stringify(data.rawResponse, null, 2)}\n\`\`\`\n`;
+    }
+    
     return content;
   }
 
@@ -664,47 +855,117 @@ export class MaybankInteractiveTool {
   }
 
   /**
-   * Execute workflow with parameters (placeholder)
+   * Execute workflow with parameters
    * @param {string} workflowName - Workflow name
    * @param {Object} parameters - Execution parameters
    * @returns {Promise<Object>} Workflow result
    */
   async executeWorkflow(workflowName, parameters) {
-    // This would integrate with the actual workflow execution engine
-    // For now, return a simulated successful result
-    logger.info('Executing Maybank workflow', { workflowName: workflowName });
-    
-    return {
-      success: true,
-      workflowName: workflowName,
-      summary: `Workflow ${workflowName} would be executed with provided parameters`,
-      data: {
-        simulated: true,
-        parameters: Object.keys(parameters).length
+    try {
+      logger.info('Executing Maybank workflow', { workflowName: workflowName });
+      
+      // Get workflow definition
+      const workflow = this.maybankWorkflows.getWorkflow(workflowName);
+      
+      // Execute workflow steps
+      const stepResults = {};
+      
+      for (const step of workflow.steps) {
+        logger.debug('Executing workflow step', {
+          workflowName: workflowName,
+          stepId: step.id,
+          operation: step.operation
+        });
+        
+        // Merge step parameters with user parameters
+        const stepParams = {
+          ...step.parameters,
+          ...parameters
+        };
+        
+        // Execute the operation through the API executor
+        if (this.executor) {
+          const result = await this.executor.executeOperation(
+            step.operation, 
+            stepParams,
+            { jwtToken: parameters.jwtToken }
+          );
+          
+          // Store result with output mapping
+          stepResults[step.outputMapping] = result;
+          
+          // Check for errors
+          if (!result.success) {
+            throw new Error(`Step ${step.id} failed: ${result.error}`);
+          }
+        } else {
+          // Fallback if executor not available
+          logger.warn('API executor not available, using simulated results');
+          stepResults[step.outputMapping] = {
+            success: true,
+            data: { simulated: true }
+          };
+        }
       }
-    };
+      
+      // Process workflow results
+      const processedResults = await this.maybankWorkflows.processWorkflowResults(
+        workflowName,
+        stepResults,
+        parameters
+      );
+      
+      return processedResults;
+      
+    } catch (error) {
+      logger.error('Workflow execution failed', { 
+        workflowName: workflowName,
+        error: error.message 
+      });
+      throw error;
+    }
   }
 
   /**
-   * Execute operation with parameters (placeholder)
+   * Execute operation with parameters
    * @param {string} operationId - Operation ID
    * @param {Object} parameters - Execution parameters
    * @returns {Promise<Object>} Operation result
    */
   async executeOperation(operationId, parameters) {
-    // This would integrate with the actual API executor
-    // For now, return a simulated successful result
-    logger.info('Executing Maybank operation', { operationId: operationId });
-    
-    return {
-      success: true,
-      operationId: operationId,
-      summary: `Operation ${operationId} would be executed with provided parameters`,
-      data: {
-        simulated: true,
-        parameters: Object.keys(parameters).length
+    try {
+      logger.info('Executing Maybank operation', { operationId: operationId });
+      
+      // Execute the operation through the API executor
+      if (this.executor) {
+        const result = await this.executor.executeOperation(
+          operationId,
+          parameters,
+          { jwtToken: parameters.jwtToken }
+        );
+        
+        return result;
+      } else {
+        // Fallback if executor not available
+        logger.warn('API executor not available, using simulated results');
+        return {
+          success: true,
+          operationId: operationId,
+          summary: `Operation ${operationId} executed (simulated mode)`,
+          data: {
+            simulated: true,
+            parameters: Object.keys(parameters).length
+          }
+        };
       }
-    };
+      
+    } catch (error) {
+      logger.error('Operation execution failed', { 
+        operationId: operationId,
+        error: error.message 
+      });
+      throw error;
+    }
   }
 
   /**
@@ -745,7 +1006,7 @@ export class MaybankInteractiveTool {
    * @returns {string} Session ID
    */
   generateSessionId() {
-    return `maybank_interactive_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `maybank_interactive_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -799,6 +1060,68 @@ export class MaybankInteractiveTool {
         optionalEnhancements: true
       }
     };
+  }
+
+  /**
+   * Log detailed API errors to file for debugging
+   * @param {Array} detailedErrors - Array of detailed error objects
+   * @param {string} sessionId - Session ID for context
+   */
+  async logErrorsToFile(detailedErrors, sessionId) {
+    try {
+      const logFileName = 'maybank-api-errors.log';
+      const timestamp = new Date().toISOString();
+      
+      let logContent = `\n${'='.repeat(80)}\n`;
+      logContent += `MAYBANK API ERROR LOG\n`;
+      logContent += `Timestamp: ${timestamp}\n`;
+      logContent += `Session ID: ${sessionId}\n`;
+      logContent += `Error Count: ${detailedErrors.length}\n`;
+      logContent += `${'='.repeat(80)}\n\n`;
+      
+      detailedErrors.forEach((errorDetail, index) => {
+        logContent += `ERROR ${index + 1}: ${errorDetail.api}\n`;
+        logContent += `${'-'.repeat(40)}\n`;
+        logContent += `API: ${errorDetail.api}\n`;
+        logContent += `Endpoint: ${errorDetail.endpoint}\n`;
+        logContent += `HTTP Status: ${errorDetail.httpStatus} ${errorDetail.httpStatusText || ''}\n`;
+        logContent += `Error Message: ${errorDetail.error}\n`;
+        logContent += `Duration: ${errorDetail.duration}ms\n`;
+        logContent += `Timestamp: ${errorDetail.timestamp}\n`;
+        
+        if (errorDetail.responseBody) {
+          logContent += `\nResponse Body:\n`;
+          logContent += typeof errorDetail.responseBody === 'string' 
+            ? errorDetail.responseBody 
+            : JSON.stringify(errorDetail.responseBody, null, 2);
+          logContent += `\n`;
+        }
+        
+        if (errorDetail.responseHeaders) {
+          logContent += `\nResponse Headers:\n`;
+          logContent += JSON.stringify(errorDetail.responseHeaders, null, 2);
+          logContent += `\n`;
+        }
+        
+        logContent += `\n`;
+      });
+      
+      // Append to log file
+      await fs.appendFile(logFileName, logContent, 'utf8');
+      
+      logger.info('API errors logged to file', {
+        fileName: logFileName,
+        errorCount: detailedErrors.length,
+        sessionId
+      });
+      
+    } catch (error) {
+      logger.error('Failed to log errors to file', {
+        error: error.message,
+        sessionId
+      });
+      // Don't throw - logging failure shouldn't break the main flow
+    }
   }
 
   /**

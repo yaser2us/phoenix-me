@@ -18,6 +18,7 @@ import { WorkflowEngine } from './workflows/workflow-engine.js';
 import { initializeConfig, config } from './config/server-config.js';
 import { logger } from './utils/logger.js';
 import { Validators } from './utils/validators.js';
+import { MaybankInteractiveTool } from './interaction/maybank-interactive-tool.js';
 
 class MCPGatewayServer {
   constructor() {
@@ -37,6 +38,7 @@ class MCPGatewayServer {
     this.executor = null;
     this.intentParser = null;
     this.workflowEngine = null;
+    this.maybankInteractiveTool = null;
     this.config = null;
     this.initialized = false;
     this.mcpTools = [];
@@ -116,7 +118,11 @@ class MCPGatewayServer {
       this.workflowEngine = new WorkflowEngine(this.registry, this.executor);
       logger.info('Workflow engine initialized successfully');
       
-      // 5. Register MCP tools dynamically (including workflow tools)
+      // 5. Initialize Maybank interactive tool (Phase 4.2)
+      this.maybankInteractiveTool = new MaybankInteractiveTool(this.registry, this.executor);
+      logger.info('Maybank interactive tool initialized successfully');
+      
+      // 6. Register MCP tools dynamically (including workflow tools)
       await this.setupMCPTools();
       
       // 6. Set up error handlers
@@ -164,6 +170,13 @@ class MCPGatewayServer {
         const workflowTools = this.createWorkflowTools();
         tools.push(...workflowTools);
         logger.info('Added workflow tools', { count: workflowTools.length });
+      }
+      
+      // PHASE 4.2: Add Maybank interactive tool
+      if (this.maybankInteractiveTool) {
+        const maybankTool = this.maybankInteractiveTool.toolDefinition;
+        tools.push(maybankTool);
+        logger.info('Added Maybank interactive tool');
       }
       
       // Store tools for the handlers (set up in constructor)
@@ -593,7 +606,12 @@ class MCPGatewayServer {
     try {
       logger.mcpToolCall(toolName, arguments_);
       
-      // PHASE 3: Check if this is a workflow tool first
+      // PHASE 4.2: Check if this is the Maybank interactive tool
+      if (toolName === 'maybank_interactive') {
+        return await this.handleMaybankInteractiveTool(arguments_);
+      }
+      
+      // PHASE 3: Check if this is a workflow tool
       if (this.isWorkflowTool(toolName)) {
         return await this.handleWorkflowToolCall(toolName, arguments_);
       }
@@ -660,6 +678,40 @@ class MCPGatewayServer {
           {
             type: "text",
             text: `Error: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+
+  // PHASE 4.2: Handle Maybank interactive tool calls
+  async handleMaybankInteractiveTool(arguments_) {
+    const startTime = Date.now();
+    
+    try {
+      // Execute the Maybank interactive tool
+      const result = await this.maybankInteractiveTool.execute(arguments_);
+      
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse('maybank_interactive', !result.isError, duration);
+      
+      // Return the result directly as it's already formatted by the tool
+      return result;
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse('maybank_interactive', false, duration);
+      logger.error('Maybank interactive tool call failed', { 
+        error: error.message,
+        duration: `${duration}ms`
+      });
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `❌ Maybank Interactive Error\n\n${error.message}`
           }
         ],
         isError: true

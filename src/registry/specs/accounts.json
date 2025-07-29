@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "https://staging.maya.maybank2u.com.my"
+            "url": "https://maya.maybank2u.com.my"
         }
     ],
     "tags": [

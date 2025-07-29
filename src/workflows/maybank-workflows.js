@@ -317,32 +317,140 @@ export class MaybankWorkflows {
    */
   aggregateFinancialData(stepResults, parameters) {
     try {
-      const maeBalance = stepResults.maeBalance?.data;
-      const accountSummary = stepResults.accountSummary?.data;
-      const allAccounts = stepResults.allAccounts?.data;
+      const maeBalance = stepResults.maeBalance;
+      const accountSummary = stepResults.accountSummary;
+      const allAccounts = stepResults.allAccounts;
 
+      // Check if any critical API calls failed and collect detailed error information
+      const failedSteps = [];
+      const apiErrors = [];
+      const detailedErrors = [];
+
+      if (!maeBalance?.success) {
+        failedSteps.push('MAE Balance');
+        const errorMsg = `MAE Balance: ${maeBalance?.error || 'API call failed'}`;
+        apiErrors.push(errorMsg);
+        
+        // Add detailed error information for debugging
+        if (maeBalance?.httpStatus) {
+          detailedErrors.push({
+            api: 'MAE Balance',
+            endpoint: '/banking/v1/summary/getBalance',
+            httpStatus: maeBalance.httpStatus,
+            httpStatusText: maeBalance.httpStatusText,
+            error: maeBalance.error,
+            responseBody: maeBalance.responseBody,
+            responseHeaders: maeBalance.responseHeaders,
+            duration: maeBalance.duration,
+            timestamp: maeBalance.timestamp
+          });
+        }
+      }
+      if (!accountSummary?.success) {
+        failedSteps.push('Account Summary');
+        const errorMsg = `Account Summary: ${accountSummary?.error || 'API call failed'}`;
+        apiErrors.push(errorMsg);
+        
+        // Add detailed error information for debugging
+        if (accountSummary?.httpStatus) {
+          detailedErrors.push({
+            api: 'Account Summary',
+            endpoint: '/banking/v1/summary',
+            httpStatus: accountSummary.httpStatus,
+            httpStatusText: accountSummary.httpStatusText,
+            error: accountSummary.error,
+            responseBody: accountSummary.responseBody,
+            responseHeaders: accountSummary.responseHeaders,
+            duration: accountSummary.duration,
+            timestamp: accountSummary.timestamp
+          });
+        }
+      }
+      if (!allAccounts?.success) {
+        failedSteps.push('All Accounts');
+        const errorMsg = `All Accounts: ${allAccounts?.error || 'API call failed'}`;
+        apiErrors.push(errorMsg);
+        
+        // Add detailed error information for debugging
+        if (allAccounts?.httpStatus) {
+          detailedErrors.push({
+            api: 'All Accounts',
+            endpoint: '/banking/v1/accounts/all',
+            httpStatus: allAccounts.httpStatus,
+            httpStatusText: allAccounts.httpStatusText,
+            error: allAccounts.error,
+            responseBody: allAccounts.responseBody,
+            responseHeaders: allAccounts.responseHeaders,
+            duration: allAccounts.duration,
+            timestamp: allAccounts.timestamp
+          });
+        }
+      }
+
+      // Use logger instead of console.log to avoid breaking MCP protocol
+      logger.debug('RAW API RESPONSES FOR DEBUGGING', {
+        maeBalance: maeBalance,
+        accountSummary: accountSummary,
+        allAccounts: allAccounts
+      });
+
+      // If all critical APIs failed, return failure with detailed error information
+      if (failedSteps.length === 3) {
+        return {
+          success: false,
+          error: `All Maybank API calls failed: ${apiErrors.join('; ')}`,
+          workflowType: 'financial_analysis',
+          failedSteps: failedSteps,
+          detailedErrors: detailedErrors,
+          summary: `All API calls failed - check detailed errors for debugging information`
+        };
+      }
+
+      // If some APIs failed, include warning in results
       const aggregated = {
         overview: {
-          totalBalance: accountSummary?.summary?.totalBalance || 0,
-          accountCount: accountSummary?.summary?.accountCount || 0,
-          maeAvailable: accountSummary?.summary?.maeAvailable || false
+          totalBalance: accountSummary?.data?.summary?.totalBalance || 0,
+          accountCount: accountSummary?.data?.summary?.accountCount || 0,
+          maeAvailable: accountSummary?.data?.summary?.maeAvailable || false
         },
         maeWallet: {
-          balance: maeBalance?.account?.balance || '0.00',
-          name: maeBalance?.account?.name || 'MAE Wallet',
-          code: maeBalance?.account?.code || '0Y'
+          balance: maeBalance?.data?.account?.balance || '0.00',
+          name: maeBalance?.data?.account?.name || 'MAE Wallet',
+          code: maeBalance?.data?.account?.code || '0Y'
         },
-        accounts: allAccounts?.accounts || [],
+        accounts: allAccounts?.data?.accounts || [],
         insights: this.generateFinancialInsights(stepResults),
         recommendations: this.generateRecommendations(stepResults),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Add API status information with detailed errors
+        apiStatus: {
+          maeBalance: maeBalance?.success ? 'success' : 'failed',
+          accountSummary: accountSummary?.success ? 'success' : 'failed', 
+          allAccounts: allAccounts?.success ? 'success' : 'failed',
+          failedSteps: failedSteps
+        },
+        // Include detailed error information for debugging
+        detailedErrors: detailedErrors.length > 0 ? detailedErrors : undefined,
+        // Include entire raw responses for debugging
+        rawResponses: {
+          maeBalance: maeBalance?.data || maeBalance,
+          accountSummary: accountSummary?.data || accountSummary,
+          allAccounts: allAccounts?.data || allAccounts
+        }
       };
 
+      // Determine overall success
+      const isPartialSuccess = failedSteps.length > 0;
+      
       return {
-        success: true,
+        success: true, // Partial success is still success
         data: aggregated,
         workflowType: 'financial_analysis',
-        summary: `Financial overview: RM ${aggregated.overview.totalBalance} across ${aggregated.overview.accountCount} accounts`
+        summary: isPartialSuccess 
+          ? `Partial results: RM ${aggregated.overview.totalBalance} (${failedSteps.length} API calls failed: ${failedSteps.join(', ')})`
+          : `Financial overview: RM ${aggregated.overview.totalBalance} across ${aggregated.overview.accountCount} accounts`,
+        warnings: isPartialSuccess ? apiErrors : undefined,
+        detailedErrors: detailedErrors.length > 0 ? detailedErrors : undefined
       };
 
     } catch (error) {
@@ -441,11 +549,18 @@ export class MaybankWorkflows {
     try {
       const balance = stepResults.balance?.data;
 
+      // Use logger instead of console.log to avoid breaking MCP protocol
+      logger.debug('RAW BALANCE RESPONSE', {
+        balanceResult: stepResults.balance
+      });
+
       const formatted = {
         balance: balance?.account?.balance || '0.00',
         accountName: balance?.account?.name || 'MAE Wallet',
         displayText: balance?.formatted?.displayText || `Balance: RM ${balance?.account?.balance || '0.00'}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Include raw response for debugging
+        rawResponse: stepResults.balance
       };
 
       return {

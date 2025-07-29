@@ -1,0 +1,450 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "bill API",
+        "description": "Auto-generated API specification for bill service",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://maya.maybank2u.com.my"
+        }
+    ],
+    "tags": [
+        {
+            "name": "bill/v2",
+            "description": "Operations for bill/v2"
+        }
+    ],
+    "paths": {
+        "/bill/v2/bills/getBillsTxnHistory": {
+            "post": {
+                "tags": [
+                    "bill/v2"
+                ],
+                "summary": "Create getBillsTxnHistory",
+                "description": "Create a new getBillsTxnHistory",
+                "operationId": "post_bill_getBillsTxnHistory",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/bills_getBillsTxnHistory_body"
+                            },
+                            "example": {
+                                "payeeCode": "1111",
+                                "billAcctNo": "210027549604",
+                                "favBillPaymentStep2": "17",
+                                "gstNotesFavPaymentStep2": "gstnotesfavpaystep2",
+                                "fullName": "Tenaga Nasional Berhad",
+                                "shortName": "Tenaga Nasional Berhad"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200"
+                                },
+                                "example": {
+                                    "statusCode": "0000",
+                                    "statusDesc": "Successful",
+                                    "populateFromAcctForPayment": null,
+                                    "populateEffectiveDateList": [
+                                        {
+                                            "text": "26 Jul 2025",
+                                            "value": "20250726"
+                                        },
+                                        {
+                                            "text": "27 Jul 2025",
+                                            "value": "20250727"
+                                        },
+                                        {
+                                            "text": "28 Jul 2025",
+                                            "value": "20250728"
+                                        },
+                                        {
+                                            "text": "29 Jul 2025",
+                                            "value": "20250729"
+                                        },
+                                        {
+                                            "text": "30 Jul 2025",
+                                            "value": "20250730"
+                                        },
+                                        {
+                                            "text": "31 Jul 2025",
+                                            "value": "20250731"
+                                        },
+                                        {
+                                            "text": "01 Aug 2025",
+                                            "value": "20250801"
+                                        },
+                                        {
+                                            "text": "02 Aug 2025",
+                                            "value": "20250802"
+                                        },
+                                        {
+                                            "text": "03 Aug 2025",
+                                            "value": "20250803"
+                                        },
+                                        {
+                                            "text": "04 Aug 2025",
+                                            "value": "20250804"
+                                        },
+                                        {
+                                            "text": "05 Aug 2025",
+                                            "value": "20250805"
+                                        },
+                                        {
+                                            "text": "06 Aug 2025",
+                                            "value": "20250806"
+                                        },
+                                        {
+                                            "text": "07 Aug 2025",
+                                            "value": "20250807"
+                                        },
+                                        {
+                                            "text": "08 Aug 2025",
+                                            "value": "20250808"
+                                        },
+                                        {
+                                            "text": "09 Aug 2025",
+                                            "value": "20250809"
+                                        },
+                                        {
+                                            "text": "10 Aug 2025",
+                                            "value": "20250810"
+                                        },
+                                        {
+                                            "text": "11 Aug 2025",
+                                            "value": "20250811"
+                                        },
+                                        {
+                                            "text": "12 Aug 2025",
+                                            "value": "20250812"
+                                        },
+                                        {
+                                            "text": "13 Aug 2025",
+                                            "value": "20250813"
+                                        },
+                                        {
+                                            "text": "14 Aug 2025",
+                                            "value": "20250814"
+                                        },
+                                        {
+                                            "text": "15 Aug 2025",
+                                            "value": "20250815"
+                                        },
+                                        {
+                                            "text": "16 Aug 2025",
+                                            "value": "20250816"
+                                        },
+                                        {
+                                            "text": "17 Aug 2025",
+                                            "value": "20250817"
+                                        },
+                                        {
+                                            "text": "18 Aug 2025",
+                                            "value": "20250818"
+                                        },
+                                        {
+                                            "text": "19 Aug 2025",
+                                            "value": "20250819"
+                                        },
+                                        {
+                                            "text": "20 Aug 2025",
+                                            "value": "20250820"
+                                        },
+                                        {
+                                            "text": "21 Aug 2025",
+                                            "value": "20250821"
+                                        },
+                                        {
+                                            "text": "22 Aug 2025",
+                                            "value": "20250822"
+                                        },
+                                        {
+                                            "text": "23 Aug 2025",
+                                            "value": "20250823"
+                                        }
+                                    ],
+                                    "gstComplianceNotes": "Please refer to Maybank2u >Accounts & Banking > Banking Fees > Bank fees: Online Bill Payment for list of Billers",
+                                    "ebpp": true,
+                                    "ebppData": {
+                                        "companyHeader": "Tenaga Nasional Berhad",
+                                        "companyUrl": "https://ebpp.maybank2u.com.my/ebpp/images/biller/111_logo.gif",
+                                        "compnyImgTitle": "Tenaga Nasional Berhad",
+                                        "svcDownMsg": null,
+                                        "billData": {
+                                            "billerRegisterd": null,
+                                            "biller": null,
+                                            "currentBill": [],
+                                            "previousBill": []
+                                        }
+                                    },
+                                    "message": null,
+                                    "lastThreePayment": []
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "inline_response_200_populateEffectiveDateList": {
+                "required": [
+                    "text",
+                    "value"
+                ],
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "example": "26 Jul 2025"
+                    },
+                    "value": {
+                        "type": "string",
+                        "example": "20250726"
+                    }
+                }
+            },
+            "inline_response_200_ebppData_billData": {
+                "required": [
+                    "currentBill",
+                    "previousBill"
+                ],
+                "type": "object",
+                "properties": {
+                    "billerRegisterd": {
+                        "type": "string"
+                    },
+                    "biller": {
+                        "type": "string"
+                    },
+                    "currentBill": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "previousBill": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "bills_getBillsTxnHistory_body": {
+                "required": [
+                    "billAcctNo",
+                    "favBillPaymentStep2",
+                    "fullName",
+                    "gstNotesFavPaymentStep2",
+                    "payeeCode",
+                    "shortName"
+                ],
+                "type": "object",
+                "properties": {
+                    "payeeCode": {
+                        "type": "string",
+                        "example": "1111"
+                    },
+                    "billAcctNo": {
+                        "type": "string",
+                        "example": "210027549604"
+                    },
+                    "favBillPaymentStep2": {
+                        "type": "string",
+                        "example": "17"
+                    },
+                    "gstNotesFavPaymentStep2": {
+                        "type": "string",
+                        "example": "gstnotesfavpaystep2"
+                    },
+                    "fullName": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    },
+                    "shortName": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    }
+                }
+            },
+            "inline_response_200": {
+                "required": [
+                    "ebpp",
+                    "ebppData",
+                    "gstComplianceNotes",
+                    "lastThreePayment",
+                    "populateEffectiveDateList",
+                    "statusCode",
+                    "statusDesc"
+                ],
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "statusDesc": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "populateFromAcctForPayment": {
+                        "type": "string"
+                    },
+                    "populateEffectiveDateList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/inline_response_200_populateEffectiveDateList"
+                        }
+                    },
+                    "gstComplianceNotes": {
+                        "type": "string",
+                        "example": "Please refer to Maybank2u >Accounts & Banking > Banking Fees > Bank fees: Online Bill Payment for list of Billers"
+                    },
+                    "ebpp": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "ebppData": {
+                        "$ref": "#/components/schemas/inline_response_200_ebppData"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "lastThreePayment": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "inline_response_200_ebppData": {
+                "required": [
+                    "billData",
+                    "companyHeader",
+                    "companyUrl",
+                    "compnyImgTitle"
+                ],
+                "type": "object",
+                "properties": {
+                    "companyHeader": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    },
+                    "companyUrl": {
+                        "type": "string",
+                        "example": "https://ebpp.maybank2u.com.my/ebpp/images/biller/111_logo.gif"
+                    },
+                    "compnyImgTitle": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    },
+                    "svcDownMsg": {
+                        "type": "string"
+                    },
+                    "billData": {
+                        "$ref": "#/components/schemas/inline_response_200_ebppData_billData"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
