@@ -1,0 +1,868 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Maybank2u API",
+        "description": "Real Maybank banking API specification for secure account management",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://staging.maya.maybank2u.com.my",
+            "description": "Maybank staging environment"
+        }
+    ],
+    "tags": [
+        {
+            "name": "banking/v1",
+            "description": "Maybank banking operations"
+        }
+    ],
+    "paths": {
+        "/banking/v1/summary/getBalance": {
+            "get": {
+                "tags": [
+                    "banking/v1"
+                ],
+                "summary": "Get MAE Wallet Balance",
+                "description": "Retrieve current MAE Wallet balance with Maybank authentication",
+                "operationId": "get_banking_getBalance",
+                "parameters": [
+                    {
+                        "name": "isFirstLoad",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "true"
+                    },
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BalanceResponse"
+                                },
+                                "example": {
+                                    "message": "success",
+                                    "code": 0,
+                                    "challenge": null,
+                                    "result": {
+                                        "name": "MAE Wallet",
+                                        "code": "0Y",
+                                        "type": "D",
+                                        "group": "0YD",
+                                        "number": "5140121213460000000",
+                                        "certs": null,
+                                        "balance": "93.34",
+                                        "currentBalance": "93.34",
+                                        "oneDayFloat": null,
+                                        "twoDayFloat": null,
+                                        "lateClearing": null,
+                                        "regNumber": null,
+                                        "loanType": null,
+                                        "value": 93.34,
+                                        "primary": true,
+                                        "supplementaryAvailable": false,
+                                        "investmentType": null,
+                                        "unitsInGrams": null,
+                                        "currencyCode": null,
+                                        "statusCode": "00",
+                                        "statusMessage": "SUCCESS",
+                                        "currencyCodes": null,
+                                        "accountType": null,
+                                        "cardType": null,
+                                        "formattedNumber": null,
+                                        "jointAccount": false,
+                                        "creditCardType": null,
+                                        "cardImage": null,
+                                        "isActive": null,
+                                        "displayCode": null,
+                                        "displayDesc": null,
+                                        "displayTitle": null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/banking/v1/summary": {
+            "get": {
+                "tags": [
+                    "banking/v1"
+                ],
+                "summary": "Get Account Summary",
+                "description": "Retrieve account summary with all account listings",
+                "operationId": "get_banking_summary",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "A"
+                    },
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SummaryResponse"
+                                },
+                                "example": {
+                                    "message": "success",
+                                    "code": 0,
+                                    "challenge": null,
+                                    "result": {
+                                        "total": 93.34,
+                                        "totalMfca": null,
+                                        "name": "Accounts",
+                                        "maeAvailable": true,
+                                        "jointAccAvailable": false,
+                                        "productGroupings": null,
+                                        "accountListings": [
+                                            {
+                                                "name": "MAE Wallet",
+                                                "code": "0Y",
+                                                "type": "D",
+                                                "group": "0YD",
+                                                "number": "5140121213460000000",
+                                                "certs": 0,
+                                                "balance": "93.34",
+                                                "currentBalance": "93.34",
+                                                "oneDayFloat": "0.00",
+                                                "twoDayFloat": "0.00",
+                                                "lateClearing": "0.00",
+                                                "regNumber": null,
+                                                "loanType": null,
+                                                "value": 93.34,
+                                                "primary": true,
+                                                "supplementaryAvailable": false,
+                                                "investmentType": null,
+                                                "unitsInGrams": null,
+                                                "currencyCode": null,
+                                                "statusCode": "00",
+                                                "statusMessage": "SUCCESS",
+                                                "currencyCodes": null,
+                                                "accountType": null,
+                                                "cardType": null,
+                                                "formattedNumber": null,
+                                                "jointAccount": false,
+                                                "creditCardType": null,
+                                                "cardImage": null,
+                                                "isActive": null,
+                                                "displayCode": null,
+                                                "displayDesc": null,
+                                                "displayTitle": null,
+                                                "lockedAmount": "0.00"
+                                            }
+                                        ],
+                                        "asnbConsentFlag": null,
+                                        "balCode": null,
+                                        "balDesc": null,
+                                        "balTitle": null,
+                                        "exception": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/banking/v1/accounts/all": {
+            "get": {
+                "tags": [
+                    "banking/v1"
+                ],
+                "summary": "List All Accounts",
+                "description": "Get a complete list of all user accounts",
+                "operationId": "get_banking_all",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Account"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "name": "MAE Wallet",
+                                        "code": "0Y",
+                                        "type": "D",
+                                        "group": "0YD",
+                                        "number": "5140121213460000000",
+                                        "certs": 0,
+                                        "balance": "93.34",
+                                        "currentBalance": null,
+                                        "oneDayFloat": null,
+                                        "twoDayFloat": null,
+                                        "lateClearing": null,
+                                        "regNumber": null,
+                                        "loanType": null,
+                                        "value": 93.34,
+                                        "primary": false,
+                                        "supplementaryAvailable": false,
+                                        "investmentType": null,
+                                        "unitsInGrams": null,
+                                        "currencyCode": null,
+                                        "statusCode": "00",
+                                        "statusMessage": "SUCCESS",
+                                        "currencyCodes": null,
+                                        "accountType": "mae",
+                                        "cardType": null,
+                                        "formattedNumber": "5140121213460000000",
+                                        "jointAccount": false,
+                                        "creditCardType": null,
+                                        "cardImage": null,
+                                        "isActive": null,
+                                        "displayCode": null,
+                                        "displayDesc": null,
+                                        "displayTitle": null
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Account": {
+                "type": "object",
+                "required": [
+                    "accountType",
+                    "balance",
+                    "certs",
+                    "code",
+                    "formattedNumber",
+                    "group",
+                    "jointAccount",
+                    "name",
+                    "number",
+                    "primary",
+                    "statusCode",
+                    "statusMessage",
+                    "supplementaryAvailable",
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "MAE Wallet"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "0Y"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "D"
+                    },
+                    "group": {
+                        "type": "string",
+                        "example": "0YD"
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "certs": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "balance": {
+                        "type": "string",
+                        "example": "93.34"
+                    },
+                    "currentBalance": {
+                        "type": "string"
+                    },
+                    "oneDayFloat": {
+                        "type": "string"
+                    },
+                    "twoDayFloat": {
+                        "type": "string"
+                    },
+                    "lateClearing": {
+                        "type": "string"
+                    },
+                    "regNumber": {
+                        "type": "string"
+                    },
+                    "loanType": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number",
+                        "example": 93.34
+                    },
+                    "primary": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "supplementaryAvailable": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "investmentType": {
+                        "type": "string"
+                    },
+                    "unitsInGrams": {
+                        "type": "string"
+                    },
+                    "currencyCode": {
+                        "type": "string"
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "00"
+                    },
+                    "statusMessage": {
+                        "type": "string",
+                        "example": "SUCCESS"
+                    },
+                    "currencyCodes": {
+                        "type": "string"
+                    },
+                    "accountType": {
+                        "type": "string",
+                        "example": "mae"
+                    },
+                    "cardType": {
+                        "type": "string"
+                    },
+                    "formattedNumber": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "jointAccount": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "creditCardType": {
+                        "type": "string"
+                    },
+                    "cardImage": {
+                        "type": "string"
+                    },
+                    "isActive": {
+                        "type": "string"
+                    },
+                    "displayCode": {
+                        "type": "string"
+                    },
+                    "displayDesc": {
+                        "type": "string"
+                    },
+                    "displayTitle": {
+                        "type": "string"
+                    }
+                }
+            },
+            "BalanceResponse": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "message",
+                    "result"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "code": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "challenge": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "$ref": "#/components/schemas/AccountBalance"
+                    }
+                }
+            },
+            "SummaryResponse": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "message",
+                    "result"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "code": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "challenge": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "$ref": "#/components/schemas/AccountSummary"
+                    }
+                }
+            },
+            "AccountBalance": {
+                "type": "object",
+                "required": [
+                    "balance",
+                    "code",
+                    "currentBalance",
+                    "group",
+                    "jointAccount",
+                    "name",
+                    "number",
+                    "primary",
+                    "statusCode",
+                    "statusMessage",
+                    "supplementaryAvailable",
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "MAE Wallet"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "0Y"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "D"
+                    },
+                    "group": {
+                        "type": "string",
+                        "example": "0YD"
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "balance": {
+                        "type": "string",
+                        "example": "93.34"
+                    },
+                    "currentBalance": {
+                        "type": "string",
+                        "example": "93.34"
+                    },
+                    "value": {
+                        "type": "number",
+                        "example": 93.34
+                    },
+                    "primary": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "supplementaryAvailable": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "00"
+                    },
+                    "statusMessage": {
+                        "type": "string",
+                        "example": "SUCCESS"
+                    },
+                    "jointAccount": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                }
+            },
+            "AccountSummary": {
+                "type": "object",
+                "required": [
+                    "accountListings",
+                    "exception",
+                    "jointAccAvailable",
+                    "maeAvailable",
+                    "name",
+                    "total"
+                ],
+                "properties": {
+                    "total": {
+                        "type": "number",
+                        "example": 93.34
+                    },
+                    "totalMfca": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Accounts"
+                    },
+                    "maeAvailable": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "jointAccAvailable": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "productGroupings": {
+                        "type": "string"
+                    },
+                    "accountListings": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountListing"
+                        }
+                    },
+                    "asnbConsentFlag": {
+                        "type": "string"
+                    },
+                    "balCode": {
+                        "type": "string"
+                    },
+                    "balDesc": {
+                        "type": "string"
+                    },
+                    "balTitle": {
+                        "type": "string"
+                    },
+                    "exception": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                }
+            },
+            "AccountListing": {
+                "type": "object",
+                "required": [
+                    "balance",
+                    "certs",
+                    "code",
+                    "currentBalance",
+                    "group",
+                    "jointAccount",
+                    "lateClearing",
+                    "lockedAmount",
+                    "name",
+                    "number",
+                    "oneDayFloat",
+                    "primary",
+                    "statusCode",
+                    "statusMessage",
+                    "supplementaryAvailable",
+                    "twoDayFloat",
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "MAE Wallet"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "0Y"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "D"
+                    },
+                    "group": {
+                        "type": "string",
+                        "example": "0YD"
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "certs": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "balance": {
+                        "type": "string",
+                        "example": "93.34"
+                    },
+                    "currentBalance": {
+                        "type": "string",
+                        "example": "93.34"
+                    },
+                    "oneDayFloat": {
+                        "type": "string",
+                        "example": "0.00"
+                    },
+                    "twoDayFloat": {
+                        "type": "string",
+                        "example": "0.00"
+                    },
+                    "lateClearing": {
+                        "type": "string",
+                        "example": "0.00"
+                    },
+                    "value": {
+                        "type": "number",
+                        "example": 93.34
+                    },
+                    "primary": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "supplementaryAvailable": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "00"
+                    },
+                    "statusMessage": {
+                        "type": "string",
+                        "example": "SUCCESS"
+                    },
+                    "jointAccount": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "lockedAmount": {
+                        "type": "string",
+                        "example": "0.00"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Maybank JWT token for secure banking API authentication"
+            }
+        }
+    }
+}

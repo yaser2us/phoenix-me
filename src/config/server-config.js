@@ -6,7 +6,7 @@ dotenv.config();
 export const config = {
   apis: {
     weather: {
-      apiKey: process.env.WEATHER_API_KEY,
+      apiKey: "36fcb595558ae810c4f2aee5557a183e",// process.env.WEATHER_API_KEY,
       timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
       retries: parseInt(process.env.MAX_RETRIES) || 3
     },
@@ -26,7 +26,7 @@ export const config = {
       retries: parseInt(process.env.MAX_RETRIES) || 3
     },
     news: {
-      apiKey: process.env.NEWS_API_KEY,
+      apiKey: "86b04a9701c04870abf919a056d8a1ec", //process.env.NEWS_API_KEY,
       timeout: parseInt(process.env.DEFAULT_TIMEOUT) || 10000,
       retries: parseInt(process.env.MAX_RETRIES) || 3
     }

@@ -1,21 +1,30 @@
 import axios from 'axios';
 import { RequestBuilder } from './request-builder.js';
+import { MaybankAdapter } from '../adapters/maybank-adapter.js';
+import { JWTManager } from '../authentication/jwt-manager.js';
+import { logger } from '../utils/logger.js';
 
 export class ApiExecutor {
   constructor(registry, authConfig) {
     this.registry = registry;
     this.authConfig = authConfig;
     this.httpClient = axios.create({
-      timeout: 10000,  // 10 second timeout
+      timeout: 30000,  // 30 second timeout for banking operations
       headers: {
         'User-Agent': 'MCP-Gateway/1.0.0'
       }
     });
+    
+    // Initialize Maybank adapter and JWT manager
+    this.maybankAdapter = new MaybankAdapter();
+    this.jwtManager = new JWTManager();
+    
+    logger.info('ApiExecutor initialized with Maybank support');
   }
 
-  async executeOperation(operationId, userParameters) {
+  async executeOperation(operationId, userParameters, options = {}) {
     try {
-      console.error(`Executing operation: ${operationId} with params:`, userParameters);
+      logger.debug('Executing operation', { operationId, userParameters });
       
       // Get operation details from registry
       const operationDetails = this.registry.getOperationDetails(operationId);
@@ -23,29 +32,54 @@ export class ApiExecutor {
         throw new Error(`Operation '${operationId}' not found in registry`);
       }
       
-      // Build request using RequestBuilder
-      const requestConfig = RequestBuilder.buildRequest(operationDetails, userParameters, this.authConfig);
-      console.error(`Built request:`, {
+      // Check if this is a Maybank operation
+      const isMaybankOperation = this.isMaybankOperation(operationDetails);
+      
+      let requestConfig;
+      
+      if (isMaybankOperation) {
+        // Use Maybank adapter for Maybank operations
+        requestConfig = await this.prepareMaybankRequest(operationId, userParameters, options);
+      } else {
+        // Use standard RequestBuilder for other operations
+        requestConfig = RequestBuilder.buildRequest(operationDetails, userParameters, this.authConfig);
+      }
+      
+      logger.debug('Built request config', {
         method: requestConfig.method,
         url: requestConfig.url,
-        params: requestConfig.params
+        hasAuth: !!requestConfig.headers?.Authorization
       });
       
       // Execute HTTP request with proper error handling
       const apiResponse = await this.makeHttpRequest(requestConfig);
       
       // Format response for MCP return
-      const formattedResponse = this.formatResponse(apiResponse, operationDetails);
+      let formattedResponse;
+      if (isMaybankOperation) {
+        formattedResponse = await this.formatMaybankResponse(apiResponse, operationId);
+      } else {
+        formattedResponse = this.formatResponse(apiResponse, operationDetails);
+      }
       
       return {
         success: true,
         data: formattedResponse,
         operationId: operationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        apiType: isMaybankOperation ? 'maybank' : 'standard'
       };
       
     } catch (error) {
-      return this.handleApiError(error, operationId);
+      // Check if this is a Maybank operation for specialized error handling
+      const operationDetails = this.registry.getOperationDetails(operationId);
+      const isMaybankOperation = operationDetails && this.isMaybankOperation(operationDetails);
+      
+      if (isMaybankOperation) {
+        return this.handleMaybankError(error, operationId);
+      } else {
+        return this.handleApiError(error, operationId);
+      }
     }
   }
 
@@ -212,6 +246,194 @@ export class ApiExecutor {
         timestamp: new Date().toISOString()
       };
     }
+  }
+
+  // Check if operation is a Maybank operation
+  isMaybankOperation(operationDetails) {
+    return operationDetails.spec && 
+           operationDetails.spec.servers && 
+           operationDetails.spec.servers.some(server => 
+             server.url && server.url.includes('staging.maya.maybank2u.com.my')
+           );
+  }
+
+  // Prepare Maybank-specific request
+  async prepareMaybankRequest(operationId, userParameters, options) {
+    try {
+      // Validate JWT token is provided
+      const jwtToken = options.jwtToken;
+      if (!jwtToken) {
+        throw new Error('JWT token is required for Maybank API operations. Please provide a valid Maybank JWT token.');
+      }
+
+      // Validate JWT token format
+      const tokenValidation = await this.jwtManager.validateMaybankToken(jwtToken);
+      if (!tokenValidation.isValid) {
+        throw new Error(`Invalid JWT token: ${tokenValidation.reason}`);
+      }
+
+      // Prepare request using Maybank adapter
+      const requestData = {
+        operation: operationId,
+        jwtToken: jwtToken,
+        parameters: userParameters
+      };
+
+      const preparedRequest = await this.maybankAdapter.prepareRequest(requestData);
+      
+      logger.debug('Maybank request prepared', {
+        operationId,
+        url: preparedRequest.url,
+        method: preparedRequest.method,
+        headerCount: Object.keys(preparedRequest.headers).length
+      });
+
+      return preparedRequest;
+
+    } catch (error) {
+      logger.error('Failed to prepare Maybank request', {
+        operationId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  // Format Maybank-specific response
+  async formatMaybankResponse(apiResponse, operationId) {
+    try {
+      // Validate response using Maybank adapter
+      const validation = await this.maybankAdapter.validateResponse(apiResponse.data, operationId);
+      
+      if (!validation.isValid) {
+        throw new Error(`Invalid Maybank response: ${validation.error}`);
+      }
+
+      // Format response based on operation type
+      switch (operationId) {
+        case 'get_banking_getBalance':
+          return this.formatMaybankBalanceResponse(validation.extractedData, apiResponse);
+          
+        case 'get_banking_summary':
+          return this.formatMaybankSummaryResponse(validation.extractedData, apiResponse);
+          
+        case 'get_banking_all':
+          return this.formatMaybankAccountsResponse(validation.extractedData, apiResponse);
+          
+        default:
+          // Generic Maybank response format
+          return {
+            status: apiResponse.status,
+            data: validation.extractedData,
+            rawData: validation.rawData,
+            operation: operationId,
+            timestamp: new Date().toISOString()
+          };
+      }
+
+    } catch (error) {
+      logger.error('Failed to format Maybank response', {
+        operationId,
+        error: error.message
+      });
+      
+      // Return raw data if formatting fails
+      return {
+        status: apiResponse.status,
+        data: apiResponse.data,
+        operation: operationId,
+        timestamp: new Date().toISOString(),
+        formatting_error: error.message
+      };
+    }
+  }
+
+  // Format MAE Wallet balance response
+  formatMaybankBalanceResponse(extractedData, apiResponse) {
+    return {
+      account: {
+        name: extractedData.accountName,
+        code: extractedData.accountCode,
+        balance: extractedData.balance,
+        currentBalance: extractedData.currentBalance,
+        value: extractedData.value
+      },
+      formatted: {
+        displayText: `${extractedData.accountName}: RM ${extractedData.balance}`,
+        balanceRM: `RM ${extractedData.balance}`,
+        accountType: 'MAE Wallet'
+      },
+      status: apiResponse.status,
+      timestamp: new Date().toISOString(),
+      operation: 'get_banking_getBalance'
+    };
+  }
+
+  // Format account summary response
+  formatMaybankSummaryResponse(extractedData, apiResponse) {
+    return {
+      summary: {
+        totalBalance: extractedData.total,
+        accountCount: extractedData.accountCount,
+        maeAvailable: extractedData.maeAvailable
+      },
+      accounts: extractedData.accounts.map(account => ({
+        name: account.name,
+        code: account.code,
+        type: account.type,
+        balance: account.balance,
+        primary: account.primary
+      })),
+      formatted: {
+        displayText: `Total Balance: RM ${extractedData.total} across ${extractedData.accountCount} accounts`,
+        totalRM: `RM ${extractedData.total}`,
+        accountSummary: extractedData.accounts.map(acc => `${acc.name}: RM ${acc.balance}`).join(', ')
+      },
+      status: apiResponse.status,
+      timestamp: new Date().toISOString(),
+      operation: 'get_banking_summary'
+    };
+  }
+
+  // Format all accounts response
+  formatMaybankAccountsResponse(extractedData, apiResponse) {
+    return {
+      accounts: extractedData.accounts.map(account => ({
+        name: account.name,
+        code: account.code,
+        type: account.accountType || account.type,
+        balance: account.balance,
+        number: account.formattedNumber || account.number,
+        primary: account.primary,
+        active: account.statusCode === '00'
+      })),
+      summary: {
+        totalAccounts: extractedData.accountCount,
+        activeAccounts: extractedData.accounts.filter(acc => acc.statusCode === '00').length
+      },
+      formatted: {
+        displayText: `Found ${extractedData.accountCount} accounts`,
+        accountList: extractedData.accounts.map(acc => 
+          `${acc.name} (${acc.accountType || acc.type}): RM ${acc.balance}`
+        ).join('\n')
+      },
+      status: apiResponse.status,
+      timestamp: new Date().toISOString(),
+      operation: 'get_banking_all'
+    };
+  }
+
+  // Enhanced error handling for Maybank operations
+  handleMaybankError(error, operationId) {
+    // Use Maybank adapter's error handling
+    const maybankError = this.maybankAdapter.handleMaybankError(error, operationId);
+    
+    return {
+      ...maybankError,
+      operationId: operationId,
+      timestamp: new Date().toISOString(),
+      apiType: 'maybank'
+    };
   }
 
   // Utility method to check if executor is properly configured

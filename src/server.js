@@ -14,6 +14,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { ApiRegistry } from './registry/api-registry.js';
 import { ApiExecutor } from './execution/executor.js';
 import { IntentParser } from './parsers/intent-parser.js';
+import { WorkflowEngine } from './workflows/workflow-engine.js';
 import { initializeConfig, config } from './config/server-config.js';
 import { logger } from './utils/logger.js';
 import { Validators } from './utils/validators.js';
@@ -35,6 +36,7 @@ class MCPGatewayServer {
     this.registry = null;
     this.executor = null;
     this.intentParser = null;
+    this.workflowEngine = null;
     this.config = null;
     this.initialized = false;
     this.mcpTools = [];
@@ -110,13 +112,17 @@ class MCPGatewayServer {
       this.executor = new ApiExecutor(this.registry, this.config.apis);
       this.intentParser = new IntentParser(this.registry);
       
-      // 4. Register MCP tools dynamically
+      // 4. Initialize workflow engine (Phase 4.1)
+      this.workflowEngine = new WorkflowEngine(this.registry, this.executor);
+      logger.info('Workflow engine initialized successfully');
+      
+      // 5. Register MCP tools dynamically (including workflow tools)
       await this.setupMCPTools();
       
-      // 5. Set up error handlers
+      // 6. Set up error handlers
       this.setupErrorHandlers();
       
-      // 6. Validate all components work
+      // 7. Validate all components work
       this.validateComponents();
       
       this.initialized = true;
@@ -153,13 +159,20 @@ class MCPGatewayServer {
         });
       }
       
+      // PHASE 3: Add workflow tools
+      if (this.workflowEngine) {
+        const workflowTools = this.createWorkflowTools();
+        tools.push(...workflowTools);
+        logger.info('Added workflow tools', { count: workflowTools.length });
+      }
+      
       // Store tools for the handlers (set up in constructor)
       this.mcpTools = tools;
       logger.info('Tools populated for MCP handlers', { count: tools.length });
       
       logger.debug('Set up MCP request handlers');
       
-      logger.info(`Set up ${operations.length} MCP tools`);
+      logger.info(`Set up ${tools.length} total MCP tools (${operations.length} operations + workflow tools)`);
       
     } catch (error) {
       logger.error('Failed to setup MCP tools', { error: error.message });
@@ -210,13 +223,382 @@ class MCPGatewayServer {
     };
   }
 
+  // PHASE 3: Create workflow tools for MCP
+  createWorkflowTools() {
+    const workflowTools = [
+      // Tool 1: Execute predefined workflow
+      {
+        name: "execute_workflow",
+        description: "Execute a predefined workflow by name with parameters",
+        inputSchema: {
+          type: "object",
+          properties: {
+            workflowName: {
+              type: "string",
+              description: "Name of the workflow to execute (e.g., location_weather, trip_planning, market_overview)"
+            },
+            parameters: {
+              type: "object",
+              description: "Parameters for the workflow execution",
+              additionalProperties: true
+            }
+          },
+          required: ["workflowName"]
+        }
+      },
+      
+      // Tool 2: Plan custom workflow from natural language
+      {
+        name: "plan_workflow",
+        description: "Plan a custom workflow from a natural language request",
+        inputSchema: {
+          type: "object",
+          properties: {
+            request: {
+              type: "string",
+              description: "Natural language description of what you want to accomplish"
+            }
+          },
+          required: ["request"]
+        }
+      },
+      
+      // Tool 3: List available workflows
+      {
+        name: "list_workflows",
+        description: "List all available predefined workflow templates",
+        inputSchema: {
+          type: "object",
+          properties: {}
+        }
+      },
+      
+      // Tool 4: Get workflow suggestions
+      {
+        name: "suggest_workflows", 
+        description: "Get workflow suggestions based on a request",
+        inputSchema: {
+          type: "object",
+          properties: {
+            request: {
+              type: "string",
+              description: "Description of what you want to accomplish"
+            }
+          },
+          required: ["request"]
+        }
+      },
+      
+      // Tool 5: Execute custom workflow with steps
+      {
+        name: "execute_custom_workflow",
+        description: "Execute a custom sequence of API operations",
+        inputSchema: {
+          type: "object",
+          properties: {
+            steps: {
+              type: "array",
+              description: "Array of operation names to execute in sequence",
+              items: {
+                type: "string"
+              }
+            },
+            parameters: {
+              type: "object",
+              description: "Parameters for the workflow steps",
+              additionalProperties: true
+            }
+          },
+          required: ["steps"]
+        }
+      }
+    ];
+
+    return workflowTools;
+  }
+
+  // PHASE 3: Check if tool is a workflow tool
+  isWorkflowTool(toolName) {
+    const workflowToolNames = [
+      'execute_workflow',
+      'plan_workflow', 
+      'list_workflows',
+      'suggest_workflows',
+      'execute_custom_workflow'
+    ];
+    return workflowToolNames.includes(toolName);
+  }
+
+  // PHASE 3: Handle workflow tool calls
+  async handleWorkflowToolCall(toolName, arguments_) {
+    const startTime = Date.now();
+    
+    try {
+      let result;
+      
+      switch (toolName) {
+        case 'execute_workflow':
+          result = await this.workflowEngine.executeWorkflow(
+            arguments_.workflowName, 
+            arguments_.parameters || {}
+          );
+          break;
+          
+        case 'plan_workflow':
+          const plan = this.intentParser.planCustomWorkflow(arguments_.request);
+          result = {
+            success: true,
+            data: {
+              plan: plan,
+              steps: plan.steps,
+              estimatedTime: plan.estimatedTime,
+              confidence: plan.confidence,
+              workflowType: plan.workflowType,
+              complexity: plan.complexity,
+              reasoning: plan.reasoning || []
+            }
+          };
+          break;
+          
+        case 'list_workflows':
+          const workflows = this.workflowEngine.getAllWorkflows();
+          result = {
+            success: true,
+            data: {
+              workflows: workflows,
+              totalCount: workflows.length
+            }
+          };
+          break;
+          
+        case 'suggest_workflows':
+          const suggestions = this.intentParser.suggestWorkflows 
+            ? this.intentParser.suggestWorkflows(arguments_.request)
+            : [];
+          result = {
+            success: true,
+            data: {
+              suggestions: suggestions,
+              requestAnalyzed: arguments_.request
+            }
+          };
+          break;
+          
+        case 'execute_custom_workflow':
+          // Execute using workflow engine's step execution logic
+          result = await this.executeCustomWorkflowSteps(arguments_.steps, arguments_.parameters || {});
+          break;
+          
+        default:
+          throw new Error(`Unknown workflow tool: ${toolName}`);
+      }
+      
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, result.success, duration);
+      
+      if (result.success) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: this.formatWorkflowResponse(result, toolName)
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Workflow tool '${toolName}' failed: ${result.error}`
+            }
+          ],
+          isError: true
+        };
+      }
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, false, duration);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error in workflow tool '${toolName}': ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+
+  // PHASE 3: Execute custom workflow steps  
+  async executeCustomWorkflowSteps(steps, parameters) {
+    const startTime = Date.now();
+    
+    try {
+      const results = {
+        success: true,
+        workflowName: 'Custom Workflow',
+        startTime: new Date().toISOString(),
+        steps: [],
+        data: {},
+        metadata: {
+          totalSteps: steps.length,
+          executedSteps: 0
+        }
+      };
+
+      const stepResults = new Map();
+      
+      for (let i = 0; i < steps.length; i++) {
+        const stepName = steps[i];
+        const stepId = `step_${i + 1}`;
+        
+        try {
+          // Execute the operation
+          const operationResult = await this.executor.executeOperation(stepName, parameters);
+          
+          stepResults.set(stepId, operationResult);
+          
+          results.steps.push({
+            id: stepId,
+            operation: stepName,
+            success: operationResult.success,
+            data: operationResult.success ? operationResult.data : null,
+            error: operationResult.success ? null : operationResult.error
+          });
+          
+          results.metadata.executedSteps++;
+          
+          if (!operationResult.success) {
+            results.success = false;
+            results.error = `Step '${stepName}' failed: ${operationResult.error}`;
+            break;
+          }
+          
+        } catch (error) {
+          results.steps.push({
+            id: stepId,
+            operation: stepName,
+            success: false,
+            error: error.message
+          });
+          
+          results.success = false;
+          results.error = `Step '${stepName}' failed: ${error.message}`;
+          break;
+        }
+      }
+
+      // Aggregate results if successful
+      if (results.success) {
+        const aggregated = {};
+        for (const [stepId, result] of stepResults) {
+          if (result.success) {
+            aggregated[stepId] = result.data;
+          }
+        }
+        results.data = aggregated;
+      }
+
+      const duration = Date.now() - startTime;
+      results.duration = duration;
+      results.endTime = new Date().toISOString();
+      
+      return results;
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      return {
+        success: false,
+        workflowName: 'Custom Workflow',
+        error: error.message,
+        duration: duration,
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString()
+      };
+    }
+  }
+
+  // PHASE 3: Format workflow tool responses
+  formatWorkflowResponse(result, toolName) {
+    try {
+      if (!result.success) {
+        return `❌ Workflow failed: ${result.error}`;
+      }
+
+      switch (toolName) {
+        case 'execute_workflow':
+          if (result.partialSuccess) {
+            return `🔄 Workflow '${result.workflowName}' completed with partial success\n\n` +
+                   `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
+                   `Duration: ${result.duration}ms\n\n` +
+                   `Warning: ${result.error}\n\n` +
+                   `Results:\n${JSON.stringify(result.data, null, 2)}`;
+          } else {
+            return `✅ Workflow '${result.workflowName}' completed successfully\n\n` +
+                   `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
+                   `Duration: ${result.duration}ms\n\n` +
+                   `Results:\n${JSON.stringify(result.data, null, 2)}`;
+          }
+          
+        case 'plan_workflow':
+          const plan = result.data.plan;
+          return `📋 Workflow Plan Generated\n\n` +
+                 `Workflow Type: ${plan.workflowType}\n` +
+                 `Complexity: ${plan.complexity}\n` +
+                 `Confidence: ${(plan.confidence * 100).toFixed(1)}%\n` +
+                 `Estimated Time: ${plan.estimatedTime}ms\n\n` +
+                 `Planned Steps:\n${plan.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n\n` +
+                 `Reasoning:\n${plan.reasoning.join('\n')}`;
+          
+        case 'list_workflows':
+          const workflows = result.data.workflows;
+          return `📚 Available Workflows (${workflows.length})\n\n` +
+                 workflows.map(w => 
+                   `• ${w.displayName}\n  Steps: ${w.stepCount}, Est. Time: ${w.estimatedTime}ms\n  ${w.description}`
+                 ).join('\n\n');
+          
+        case 'suggest_workflows':
+          const suggestions = result.data.suggestions;
+          if (suggestions.length === 0) {
+            return `💡 No workflow suggestions found for: "${result.data.requestAnalyzed}"`;
+          }
+          return `💡 Workflow Suggestions for: "${result.data.requestAnalyzed}"\n\n` +
+                 suggestions.map((s, i) => 
+                   `${i + 1}. ${s.workflowType} (confidence: ${(s.confidence * 100).toFixed(1)}%)\n` +
+                   `   Reasoning: ${s.reasoning}`
+                 ).join('\n\n');
+          
+        case 'execute_custom_workflow':
+          return `🔧 Custom workflow completed\n\n` +
+                 `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
+                 `Duration: ${result.duration}ms\n\n` +
+                 `Results:\n${JSON.stringify(result.data, null, 2)}`;
+          
+        default:
+          return `Workflow tool '${toolName}' completed successfully\n\n${JSON.stringify(result.data, null, 2)}`;
+      }
+      
+    } catch (error) {
+      return `Error formatting workflow response: ${error.message}\n\nRaw result:\n${JSON.stringify(result, null, 2)}`;
+    }
+  }
+
   async handleToolCall(toolName, arguments_) {
     const startTime = Date.now();
     
     try {
       logger.mcpToolCall(toolName, arguments_);
       
-      // 1. Map tool name to operation
+      // PHASE 3: Check if this is a workflow tool first
+      if (this.isWorkflowTool(toolName)) {
+        return await this.handleWorkflowToolCall(toolName, arguments_);
+      }
+      
+      // 1. Map tool name to operation (existing single API logic)
       const operationId = toolName; // For Phase 1, tool name = operation ID
       const operationDetails = this.registry.getOperationDetails(operationId);
       
@@ -375,7 +757,7 @@ class MCPGatewayServer {
     });
     
     // Handle unhandled promise rejections
-    process.on('unhandledRejection', (reason, promise) => {
+    process.on('unhandledRejection', (reason) => {
       logger.error('Unhandled promise rejection', { reason: reason?.message || reason });
       process.exit(1);
     });
