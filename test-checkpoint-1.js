@@ -76,17 +76,17 @@ async function testCheckpoint1() {
     
     // Test 3: Maybank URL construction
     console.log('\nTest 3: Maybank URL construction');
-    const balanceRequest = await maybankAdapter.buildURL('get_banking_getBalance', {
+    const balanceURL = await maybankAdapter.buildURL('get_banking_getBalance', {
       isFirstLoad: 'true'
     });
     
     const expectedURL = 'https://staging.maya.maybank2u.com.my/banking/v1/summary/getBalance?isFirstLoad=true';
     
-    if (balanceRequest.url === expectedURL) {
+    if (balanceURL === expectedURL) {
       console.log('✅ Maybank URL construction working');
-      console.log('   URL:', balanceRequest.url);
+      console.log('   URL:', balanceURL);
     } else {
-      throw new Error(`URL mismatch. Expected: ${expectedURL}, Got: ${balanceRequest.url}`);
+      throw new Error(`URL mismatch. Expected: ${expectedURL}, Got: ${balanceURL}`);
     }
     
     // Test 4: Maybank response schema validation
@@ -148,23 +148,23 @@ async function testCheckpoint1() {
     console.log('\nTest 7: Additional Maybank operations');
     
     // Test summary endpoint
-    const summaryRequest = await maybankAdapter.buildURL('get_banking_summary', { type: 'A' });
+    const summaryURL = await maybankAdapter.buildURL('get_banking_summary', { type: 'A' });
     const expectedSummaryURL = 'https://staging.maya.maybank2u.com.my/banking/v1/summary?type=A';
     
-    if (summaryRequest.url === expectedSummaryURL) {
+    if (summaryURL === expectedSummaryURL) {
       console.log('✅ Summary endpoint URL construction working');
     } else {
-      throw new Error(`Summary URL mismatch. Expected: ${expectedSummaryURL}, Got: ${summaryRequest.url}`);
+      throw new Error(`Summary URL mismatch. Expected: ${expectedSummaryURL}, Got: ${summaryURL}`);
     }
     
     // Test accounts/all endpoint
-    const allAccountsRequest = await maybankAdapter.buildURL('get_banking_all', {});
+    const allAccountsURL = await maybankAdapter.buildURL('get_banking_all', {});
     const expectedAllURL = 'https://staging.maya.maybank2u.com.my/banking/v1/accounts/all';
     
-    if (allAccountsRequest.url === expectedAllURL) {
+    if (allAccountsURL === expectedAllURL) {
       console.log('✅ All accounts endpoint URL construction working');
     } else {
-      throw new Error(`All accounts URL mismatch. Expected: ${expectedAllURL}, Got: ${allAccountsRequest.url}`);
+      throw new Error(`All accounts URL mismatch. Expected: ${expectedAllURL}, Got: ${allAccountsURL}`);
     }
     
     // Test 8: Adapter status check
