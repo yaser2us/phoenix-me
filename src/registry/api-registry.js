@@ -99,6 +99,7 @@ export class ApiRegistry {
                 responses: operation.responses || {},
                 spec: openApiSpec,
                 specName: specName,
+                apiId: specName,
                 servers: openApiSpec.servers || [],
                 security: operation.security || openApiSpec.security || []
               };
@@ -160,6 +161,14 @@ export class ApiRegistry {
     }
     
     return operation;
+  }
+
+  getOperation(operationId) {
+    if (!this.initialized) {
+      throw new Error('ApiRegistry not initialized');
+    }
+    
+    return this.operations.get(operationId);
   }
 
   getAllOperations() {
@@ -230,5 +239,79 @@ export class ApiRegistry {
       .replace(/[^\w\s]/g, ' ')  // Replace non-word chars with spaces
       .replace(/\s+/g, ' ')      // Collapse multiple spaces
       .trim();
+  }
+
+  /**
+   * Find operations by user intent
+   * @param {string} intent - User intent or goal
+   * @returns {Array} Matching operations with confidence scores
+   */
+  findOperationsByIntent(intent) {
+    const results = [];
+    const intentLower = intent.toLowerCase();
+    
+    // Search through all operations
+    for (const [operationId, details] of this.operations) {
+      let confidence = 0;
+      
+      // Check operation ID match
+      if (operationId.toLowerCase().includes(intentLower)) {
+        confidence = 0.8;
+      }
+      
+      // Check summary/description match
+      if (details.summary && details.summary.toLowerCase().includes(intentLower)) {
+        confidence = Math.max(confidence, 0.7);
+      }
+      
+      // Check for specific keywords
+      const keywords = this.extractKeywords(intent);
+      const opKeywords = this.extractKeywords(operationId + ' ' + (details.summary || ''));
+      const matchingKeywords = keywords.filter(k => opKeywords.includes(k));
+      if (matchingKeywords.length > 0) {
+        confidence = Math.max(confidence, matchingKeywords.length / keywords.length);
+      }
+      
+      if (confidence > 0.5) {
+        results.push({
+          apiId: details.apiId,
+          operation: details,
+          operationId: operationId,
+          confidence: confidence
+        });
+      }
+    }
+    
+    // Sort by confidence
+    return results.sort((a, b) => b.confidence - a.confidence);
+  }
+
+  /**
+   * Get all operations grouped by API
+   * @returns {Object} Operations grouped by API ID
+   */
+  getAllOperations() {
+    const grouped = {};
+    
+    for (const [operationId, details] of this.operations) {
+      const apiId = details.apiId || details.specName;
+      if (!grouped[apiId]) {
+        grouped[apiId] = {};
+      }
+      grouped[apiId][operationId] = details;
+    }
+    
+    return grouped;
+  }
+
+  /**
+   * Extract keywords from text
+   * @private
+   */
+  extractKeywords(text) {
+    return text.toLowerCase()
+      .split(/[\s_\-,]+/)
+      .filter(word => word.length > 2)
+      .filter(word => !['the', 'and', 'for', 'with', 'from'].includes(word));
   }
 }
