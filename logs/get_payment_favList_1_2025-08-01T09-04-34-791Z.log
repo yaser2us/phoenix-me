@@ -1,0 +1,408 @@
+
+==========================================================================
+API FLOW DEBUG LOG
+==========================================================================
+Session ID: get_payment_favList_1_2025-08-01T09-04-34-791Z
+Operation: get_payment_favList_1
+Started At: 2025-08-01T09:04:34.791Z
+==========================================================================
+
+
+[2025-08-01T09:04:34.792Z] ✅ ENTRY_POINT
+======================================================================
+{
+  "toolName": "get_payment_favList_1",
+  "arguments": {
+    "Accept": "application/json",
+    "X-APP-BUILD-NO": "1",
+    "X-APP-ENVIRONMENT": "production",
+    "X-APP-PLATFORM": "web",
+    "X-APP-RELEASE-NO": "1.0",
+    "X-APP-SESSION-TRACE-ID": "session-022",
+    "X-APP-VERSION": "1.0.0",
+    "X-MB-Client-Id": "client-022",
+    "X-MB-E2E-Id": "e2e-022",
+    "X-MB-ENV": "prod",
+    "X-MB-Timestamp": "1722442300",
+    "x-mb-client-adapter": "mobile"
+  },
+  "timestamp": "2025-08-01T09:04:34.792Z"
+}
+
+
+[2025-08-01T09:04:34.793Z] ✅ EXECUTOR_START
+======================================================================
+{
+  "operationId": "get_payment_favList_1",
+  "userParameters": {
+    "Accept": "application/json",
+    "X-APP-BUILD-NO": "1",
+    "X-APP-ENVIRONMENT": "production",
+    "X-APP-PLATFORM": "web",
+    "X-APP-RELEASE-NO": "1.0",
+    "X-APP-SESSION-TRACE-ID": "session-022",
+    "X-APP-VERSION": "1.0.0",
+    "X-MB-Client-Id": "client-022",
+    "X-MB-E2E-Id": "e2e-022",
+    "X-MB-ENV": "prod",
+    "X-MB-Timestamp": "1722442300",
+    "x-mb-client-adapter": "mobile"
+  },
+  "options": {},
+  "timestamp": "2025-08-01T09:04:34.793Z"
+}
+
+
+[2025-08-01T09:04:34.793Z] ✅ OPERATION_DETAILS
+======================================================================
+{
+  "found": true,
+  "path": "/payment/v1/pay/bill/favList",
+  "method": "GET",
+  "servers": [
+    {
+      "url": "https://maya.maybank2u.com.my"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "Accept",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-PLATFORM",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-VERSION",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-ENVIRONMENT",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-BUILD-NO",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-RELEASE-NO",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-APP-SESSION-TRACE-ID",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "x-mb-client-adapter",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-MB-E2E-Id",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-MB-Timestamp",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-MB-ENV",
+      "in": "header",
+      "required": true
+    },
+    {
+      "name": "X-MB-Client-Id",
+      "in": "header",
+      "required": true
+    }
+  ]
+}
+
+
+[2025-08-01T09:04:34.793Z] ✅ JWT_EXTRACTION
+======================================================================
+{
+  "hasOptionsToken": false,
+  "hasAuthHeader": false,
+  "authHeaderKey": null,
+  "authHeaderValue": null
+}
+
+
+[2025-08-01T09:04:34.793Z] ✅ MAYBANK_HEADER_BUILD
+======================================================================
+{
+  "providedToken": true,
+  "usingDefaultToken": false,
+  "tokenUsed": {
+    "token": "eyJhbGciOiJIUzI1NiIs...b0lzG2wt9uXJwi01E0xM"
+  },
+  "tokenLength": 879,
+  "operationId": "get_payment_favList_1"
+}
+
+
+[2025-08-01T09:04:34.794Z] ✅ API_CALL
+======================================================================
+{
+  "method": "GET",
+  "url": "https://maya.maybank2u.com.my/payment/v1/pay/bill/favList",
+  "headers": {
+    "Accept": "application/json",
+    "X-APP-PLATFORM": "IOS",
+    "X-APP-VERSION": "0.9.38",
+    "X-APP-ENVIRONMENT": "",
+    "X-APP-BUILD-NO": "1203",
+    "X-APP-RELEASE-NO": "25.5.0",
+    "X-APP-SESSION-TRACE-ID": "T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=",
+    "x-mb-client-adapter": "mae-favorites-bill-payment-inquiry",
+    "X-MB-E2E-Id": "T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=",
+    "X-MB-Timestamp": "1754039074793",
+    "X-MB-ENV": "S",
+    "X-MB-Client-Id": "mae-fe-iv5p7",
+    "authorization": "bearer eyJhbGciOiJIU...b0lzG2wt9uXJwi01E0xM",
+    "maya-authorization": "bearer eyJhbGciOiJIU...b0lzG2wt9uXJwi01E0xM"
+  },
+  "body": "No body",
+  "curlCommand": "curl -X GET \"https://maya.maybank2u.com.my/payment/v1/pay/bill/favList\" \\\n  -H \"Accept: application/json\" \\\n  -H \"X-APP-PLATFORM: IOS\" \\\n  -H \"X-APP-VERSION: 0.9.38\" \\\n  -H \"X-APP-ENVIRONMENT: \" \\\n  -H \"X-APP-BUILD-NO: 1203\" \\\n  -H \"X-APP-RELEASE-NO: 25.5.0\" \\\n  -H \"X-APP-SESSION-TRACE-ID: T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=\" \\\n  -H \"x-mb-client-adapter: mae-favorites-bill-payment-inquiry\" \\\n  -H \"X-MB-E2E-Id: T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=\" \\\n  -H \"X-MB-Timestamp: 1754039074793\" \\\n  -H \"X-MB-ENV: S\" \\\n  -H \"X-MB-Client-Id: mae-fe-iv5p7\" \\\n  -H \"authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTE2LjE5ODg4MTE2ODJAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJweWl4L1VxNmx2SzJSbTU3dldzL0RLaGlWZWtsUUhDaW1KejN0UE1UVjdHU1Nlc2lac1YvOTFNWmoxU2NMb0xkUm9EbFRjMUZRelhtODFValdNL2lwekYxVm14Q0Y0SFZLWjJadnUyZDJXRisrRE41MHprNHpVclZXa210bHNWSDVzQkdrU25tNHNjZ2FwdHBCd2Ruak1LcUhkMVNDVHBUTlU3Y0piWWtXVG89IiwiZXhwIjoxNzg1NjExMDQwLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM4ZGUwMGFkLTVhMmMtNGI2YS1iMDZmLTBhY2U5OGQyYTdiNSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hcBaggoTIjZLTlBHheoGv9Ib0lzG2wt9uXJwi01E0xM\" \\\n  -H \"maya-authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTE2LjE5ODg4MTE2ODJAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJweWl4L1VxNmx2SzJSbTU3dldzL0RLaGlWZWtsUUhDaW1KejN0UE1UVjdHU1Nlc2lac1YvOTFNWmoxU2NMb0xkUm9EbFRjMUZRelhtODFValdNL2lwekYxVm14Q0Y0SFZLWjJadnUyZDJXRisrRE41MHprNHpVclZXa210bHNWSDVzQkdrU25tNHNjZ2FwdHBCd2Ruak1LcUhkMVNDVHBUTlU3Y0piWWtXVG89IiwiZXhwIjoxNzg1NjExMDQwLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM4ZGUwMGFkLTVhMmMtNGI2YS1iMDZmLTBhY2U5OGQyYTdiNSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hcBaggoTIjZLTlBHheoGv9Ib0lzG2wt9uXJwi01E0xM\" \\\n  -v"
+}
+
+
+[2025-08-01T09:04:35.045Z] ✅ API_RESPONSE
+======================================================================
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": {
+    "server": "Apache",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "SAMEORIGIN, DENY",
+    "x-content-type-options": "nosniff, nosniff",
+    "trace-id": "8b4742e1b1fcfb4b",
+    "x-xss-protection": "1; mode=block",
+    "content-type": "application/json;charset=UTF-8",
+    "content-length": "1994",
+    "expires": "Fri, 01 Aug 2025 09:04:35 GMT",
+    "cache-control": "max-age=0, no-cache, no-store",
+    "pragma": "no-cache",
+    "date": "Fri, 01 Aug 2025 09:04:35 GMT",
+    "connection": "close",
+    "set-cookie": "mylif_my_srcsite=my001; Path=/, f5avraaaaaaaaaaaaaaaa_session_=OGLEPEHDCIBDPLEJHOCJCAAJLHMOAJNGJIAONHIGAJGJCGMELDNHDCJABKMCKKONMNMDNLAPHCOLCDANILCAPHLKNIBGEOOKPMDMDLDDFJMHPJEPJDENGNOHIKJCEIMO; HttpOnly; secure"
+  },
+  "data": {
+    "selectedPageSize": 0,
+    "resultList": [
+      {
+        "oid": "9349",
+        "fullName": "Tenaga Nasional Berhad",
+        "shortName": "Tenaga Nasional Berhad",
+        "onlinePayment": "1",
+        "noteRequired": null,
+        "noteRequired2": null,
+        "noteRequired3": null,
+        "billAcctDispNameRequired": "0",
+        "bilAcctDispName": "Bill Account No",
+        "billRefDispNameRequired": "1",
+        "billRefDispName": "IC No.",
+        "billRefRequired": "1",
+        "billAcctRequired": "0",
+        "creditCardPayment": "0",
+        "minPayment": "0",
+        "minPaymentAmount": "1",
+        "maxPayment": "0",
+        "maxPaymentAmount": "100000",
+        "typeOfPayment": "5",
+        "minCreditCardPayment": null,
+        "maxCreditCardPament": null,
+        "effectiveDate": "0",
+        "billAcctHolderDispNameReq": "1",
+        "billAccHolderName": null,
+        "serialNoIndicator": "1",
+        "serialNoName": null,
+        "rechargeCodeIndicator": "1",
+        "rechargeCodeName": null,
+        "payeeCode": "1111",
+        "pnPayeeIp": null,
+        "pnPriority": null,
+        "pnEstatus": "1",
+        "pnPayeeEmail1": null,
+        "pnPayeeEmail2": null,
+        "authenticationRequired": "1",
+        "tacRequired": "0",
+        "returnedLink": "1",
+        "payeeUrl": null,
+        "billRef2Required": "0",
+        "billRef2DispNameRequired": "0",
+        "billRef2DispName": "Contract No.",
+        "recurringIndicator": "0",
+        "downtimeBit": "1",
+        "downtimeMessage": "Dear valued customers,\r\nPlease be informed that our TNB service is currently not available due to system maintenance.\r\nWe will endeavour to minimise the duration of unavailability of this service and would like to apologise in advance should you encounter any inconvenience.\r\nWe take this opportunity to thank you for your understanding and patience.\r\nShould you require any assistance, please contact our Maybank Group Customer Care at 1-300 88 6688.",
+        "downStartDate": "2021-03-26",
+        "downEndDate": "2021-03-27",
+        "image": null,
+        "ebpp": "1",
+        "payHist": null,
+        "acctId": "210027549604",
+        "billerCode": null,
+        "billerName": null,
+        "billRef1": null,
+        "billRef2": null,
+        "acctHolderName": null,
+        "paybill": true,
+        "jompay": false,
+        "imageName": "111.png",
+        "imageUrl": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/111.png",
+        "mbbAccountName": "Tenaga Nasional Berhad"
+      }
+    ],
+    "startPage": 0,
+    "endPage": 0,
+    "resultCount": 1,
+    "totalPage": 0
+  },
+  "timestamp": "2025-08-01T09:04:35.045Z"
+}
+
+
+==========================================================================
+SESSION SUMMARY
+==========================================================================
+Session ID: get_payment_favList_1_2025-08-01T09-04-34-791Z
+Ended At: 2025-08-01T09:04:35.046Z
+Result: SUCCESS
+Status Code: Unknown
+Error: None
+Log File: /Users/80001411yasserbatole/Documents/GitHub/phoenix-me/logs/get_payment_favList_1_2025-08-01T09-04-34-791Z.log
+==========================================================================
+
+[2025-08-01T09:05:57.592Z] ✅ API_CALL
+======================================================================
+{
+  "method": "GET",
+  "url": "https://maya.maybank2u.com.my/payment/v1/zakat/favList",
+  "headers": {
+    "Accept": "application/json",
+    "X-APP-PLATFORM": "IOS",
+    "X-APP-VERSION": "0.9.38",
+    "X-APP-ENVIRONMENT": "",
+    "X-APP-BUILD-NO": "1203",
+    "X-APP-RELEASE-NO": "25.5.0",
+    "X-APP-SESSION-TRACE-ID": "T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=",
+    "x-mb-client-adapter": "mae-favorites-bill-payment-inquiry",
+    "X-MB-E2E-Id": "T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=",
+    "X-MB-Timestamp": "1754039157592",
+    "X-MB-ENV": "S",
+    "X-MB-Client-Id": "mae-fe-iv5p7",
+    "authorization": "bearer eyJhbGciOiJIU...b0lzG2wt9uXJwi01E0xM",
+    "maya-authorization": "bearer eyJhbGciOiJIU...b0lzG2wt9uXJwi01E0xM"
+  },
+  "body": "No body",
+  "curlCommand": "curl -X GET \"https://maya.maybank2u.com.my/payment/v1/zakat/favList\" \\\n  -H \"Accept: application/json\" \\\n  -H \"X-APP-PLATFORM: IOS\" \\\n  -H \"X-APP-VERSION: 0.9.38\" \\\n  -H \"X-APP-ENVIRONMENT: \" \\\n  -H \"X-APP-BUILD-NO: 1203\" \\\n  -H \"X-APP-RELEASE-NO: 25.5.0\" \\\n  -H \"X-APP-SESSION-TRACE-ID: T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=\" \\\n  -H \"x-mb-client-adapter: mae-favorites-bill-payment-inquiry\" \\\n  -H \"X-MB-E2E-Id: T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=\" \\\n  -H \"X-MB-Timestamp: 1754039157592\" \\\n  -H \"X-MB-ENV: S\" \\\n  -H \"X-MB-Client-Id: mae-fe-iv5p7\" \\\n  -H \"authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTE2LjE5ODg4MTE2ODJAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJweWl4L1VxNmx2SzJSbTU3dldzL0RLaGlWZWtsUUhDaW1KejN0UE1UVjdHU1Nlc2lac1YvOTFNWmoxU2NMb0xkUm9EbFRjMUZRelhtODFValdNL2lwekYxVm14Q0Y0SFZLWjJadnUyZDJXRisrRE41MHprNHpVclZXa210bHNWSDVzQkdrU25tNHNjZ2FwdHBCd2Ruak1LcUhkMVNDVHBUTlU3Y0piWWtXVG89IiwiZXhwIjoxNzg1NjExMDQwLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM4ZGUwMGFkLTVhMmMtNGI2YS1iMDZmLTBhY2U5OGQyYTdiNSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hcBaggoTIjZLTlBHheoGv9Ib0lzG2wt9uXJwi01E0xM\" \\\n  -H \"maya-authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTE2LjE5ODg4MTE2ODJAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJweWl4L1VxNmx2SzJSbTU3dldzL0RLaGlWZWtsUUhDaW1KejN0UE1UVjdHU1Nlc2lac1YvOTFNWmoxU2NMb0xkUm9EbFRjMUZRelhtODFValdNL2lwekYxVm14Q0Y0SFZLWjJadnUyZDJXRisrRE41MHprNHpVclZXa210bHNWSDVzQkdrU25tNHNjZ2FwdHBCd2Ruak1LcUhkMVNDVHBUTlU3Y0piWWtXVG89IiwiZXhwIjoxNzg1NjExMDQwLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM4ZGUwMGFkLTVhMmMtNGI2YS1iMDZmLTBhY2U5OGQyYTdiNSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hcBaggoTIjZLTlBHheoGv9Ib0lzG2wt9uXJwi01E0xM\" \\\n  -v"
+}
+
+
+[2025-08-01T09:05:57.761Z] ✅ API_RESPONSE
+======================================================================
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": {
+    "server": "Apache",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload, max-age=31536000 ; includeSubDomains",
+    "x-frame-options": "SAMEORIGIN, DENY",
+    "x-content-type-options": "nosniff, nosniff",
+    "trace-id": "5fd66293042485ef",
+    "x-xss-protection": "1; mode=block",
+    "content-type": "application/json;charset=UTF-8",
+    "content-length": "1489",
+    "expires": "Fri, 01 Aug 2025 09:05:57 GMT",
+    "cache-control": "max-age=0, no-cache, no-store",
+    "pragma": "no-cache",
+    "date": "Fri, 01 Aug 2025 09:05:57 GMT",
+    "connection": "close",
+    "set-cookie": "mylif_my_srcsite=my003; Path=/, f5avraaaaaaaaaaaaaaaa_session_=PHMLBBIJMHNNGPBBGDJCFCCCHELPNLGNNMPIGNMOIHIPJCKCFNMFHLPMCBMFANCBMBGDLGMHKDILICIOAKKALHHDCILPFBODCDOIAKHIBPIKBCAPHDKOPKLBMHHMFKBO; HttpOnly; secure"
+  },
+  "data": {
+    "selectedPageSize": 0,
+    "resultList": [
+      {
+        "oid": "94478",
+        "fullName": "MAIPs - Perlis",
+        "shortName": "MAIPs - Perlis",
+        "onlinePayment": "1",
+        "noteRequired": null,
+        "noteRequired2": null,
+        "noteRequired3": null,
+        "billAcctDispNameRequired": "0",
+        "bilAcctDispName": "Telephone No.",
+        "billRefDispNameRequired": "0",
+        "billRefDispName": "Type Of Zakat",
+        "billRefRequired": "0",
+        "billAcctRequired": "0",
+        "creditCardPayment": "1",
+        "minPayment": "1",
+        "minPaymentAmount": null,
+        "maxPayment": "0",
+        "maxPaymentAmount": "100000",
+        "typeOfPayment": "2",
+        "minCreditCardPayment": null,
+        "maxCreditCardPament": null,
+        "effectiveDate": "0",
+        "billAcctHolderDispNameReq": "1",
+        "billAccHolderName": null,
+        "serialNoIndicator": "1",
+        "serialNoName": null,
+        "rechargeCodeIndicator": "1",
+        "rechargeCodeName": null,
+        "payeeCode": "1LT1",
+        "pnPayeeIp": null,
+        "pnPriority": null,
+        "pnEstatus": "1",
+        "pnPayeeEmail1": null,
+        "pnPayeeEmail2": null,
+        "authenticationRequired": "1",
+        "tacRequired": "0",
+        "returnedLink": "1",
+        "payeeUrl": null,
+        "billRef2Required": "1",
+        "billRef2DispNameRequired": "1",
+        "billRef2DispName": null,
+        "recurringIndicator": "0",
+        "downtimeBit": "1",
+        "downtimeMessage": null,
+        "downStartDate": null,
+        "downEndDate": null,
+        "image": null,
+        "ebpp": null,
+        "payHist": null,
+        "acctId": "0176159404",
+        "billerCode": null,
+        "billerName": null,
+        "billRef1": null,
+        "billRef2": null,
+        "acctHolderName": null,
+        "paybill": true,
+        "jompay": false,
+        "imageName": "1LT.png",
+        "imageUrl": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/1LT.png",
+        "mbbAccountName": "Zakat Emas"
+      }
+    ],
+    "startPage": 0,
+    "endPage": 0,
+    "resultCount": 1,
+    "totalPage": 0
+  },
+  "timestamp": "2025-08-01T09:05:57.761Z"
+}
+

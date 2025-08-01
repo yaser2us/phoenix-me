@@ -17,7 +17,7 @@ export class ApiExecutor {
     });
     
     // Initialize Maybank adapter and JWT manager
-    this.maybankAdapter = new MaybankAdapter();
+    this.maybankAdapter = new MaybankAdapter(this.registry);
     this.jwtManager = new JWTManager();
     
     logger.info('ApiExecutor initialized with Maybank support');

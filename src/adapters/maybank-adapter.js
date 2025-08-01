@@ -1,13 +1,16 @@
 import { logger } from '../utils/logger.js';
 import crypto from 'crypto';
 import { debugLogger } from '../utils/debug-logger.js';
+import { SchemaRequestBuilder } from '../builders/schema-request-builder.js';
+import { SchemaResponseValidator } from '../builders/schema-response-validator.js';
 
 /**
  * Maybank API Adapter - Phase 4.2 Checkpoint 1
  * Handles Maybank-specific headers, authentication, and request formatting
  */
 export class MaybankAdapter {
-  constructor(config = {}) {
+  constructor(registry = null, config = {}) {
+    this.registry = registry;
     this.config = {
       platform: 'IOS',
       appVersion: '0.9.38',
@@ -23,8 +26,12 @@ export class MaybankAdapter {
     
     // Hardcoded JWT token for testing (temporary)
     // TODO: Remove this hardcoded token in production
-    this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTA3LjEyODA3NTU3OTVAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJuTkxBSVNUQllSM1J4Uy81aHBxQnlJN1BlMTU1ck1YeE1EUkJpcUxxNUtDVHhaa2NTblRMT2Y0UW1TODgzbUdqNE9jWnhveStqYTlXQlA1WkQrOUxMRzdNNWhRZTdTYWgzbzNiQmRjMXV2QWtUd09vNnFZYW96TlpJb0ZURWovT2s2dVp0VVZtekRXZjlnbFdEZ0JNdWd2WncvcDUyOG1IZXlmSWRmY1JwUlE9IiwiZXhwIjoxNzg1NTc3MDE1LCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImNjYTkyZDViLTk0MjctNDY1MS1hMGU0LTdkNDE2Y2Y2MGY2NSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.vc5iWlr0qsXtvwGospoXjJDJAjgh8oKdvontdIdHF28'
-    // this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDcyOTE1LjAwNTk3NTU5MTdAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJlRk9YT1ZmUTlaRjA3TVozSXNHaGU5UDVaY0JYUUN5R1dEd1lWUlp2aDh1Q3NhYmFXeVRsbkdCbjdwZHFrcjZ3a2xORGZTbjhrZDYwRlZKYmVzT1hnSm5GcGFLYWpuU1JxemNzb2RscmdVNktZM2h4ZnFwS05IWVFHcnlqY0FaVXR3TktMVlgyL0kwQVpUUnQrVFB1cDI3Y0ErWGswNFAwQnp5WVdSL3Z6bFU9IiwiZXhwIjoxNzg1MzQ1NTYxLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImZiMmJlOTNjLTNkZDAtNGJlNi1hOTI0LTJkNWUzYjIwNjBkOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hMEH-zzCSV7tHYphdwEezQbSL6kbZCODVuydbKredqA';
+    this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTE2LjE5ODg4MTE2ODJAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJweWl4L1VxNmx2SzJSbTU3dldzL0RLaGlWZWtsUUhDaW1KejN0UE1UVjdHU1Nlc2lac1YvOTFNWmoxU2NMb0xkUm9EbFRjMUZRelhtODFValdNL2lwekYxVm14Q0Y0SFZLWjJadnUyZDJXRisrRE41MHprNHpVclZXa210bHNWSDVzQkdrU25tNHNjZ2FwdHBCd2Ruak1LcUhkMVNDVHBUTlU3Y0piWWtXVG89IiwiZXhwIjoxNzg1NjExMDQwLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM4ZGUwMGFkLTVhMmMtNGI2YS1iMDZmLTBhY2U5OGQyYTdiNSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hcBaggoTIjZLTlBHheoGv9Ib0lzG2wt9uXJwi01E0xM'
+     // this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDcyOTE1LjAwNTk3NTU5MTdAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJlRk9YT1ZmUTlaRjA3TVozSXNHaGU5UDVaY0JYUUN5R1dEd1lWUlp2aDh1Q3NhYmFXeVRsbkdCbjdwZHFrcjZ3a2xORGZTbjhrZDYwRlZKYmVzT1hnSm5GcGFLYWpuU1JxemNzb2RscmdVNktZM2h4ZnFwS05IWVFHcnlqY0FaVXR3TktMVlgyL0kwQVpUUnQrVFB1cDI3Y0ErWGswNFAwQnp5WVdSL3Z6bFU9IiwiZXhwIjoxNzg1MzQ1NTYxLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImZiMmJlOTNjLTNkZDAtNGJlNi1hOTI0LTJkNWUzYjIwNjBkOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hMEH-zzCSV7tHYphdwEezQbSL6kbZCODVuydbKredqA';
+    
+    // Initialize schema builders
+    this.requestBuilder = new SchemaRequestBuilder();
+    this.responseValidator = new SchemaResponseValidator();
     
     logger.info('Maybank adapter initialized', { config: this.config });
   }
@@ -49,28 +56,62 @@ export class MaybankAdapter {
       });
 
       // Build request headers with all required Maybank headers
-      const headers = await this.buildMaybankHeaders(tokenToUse, operation);
+      let headers = await this.buildMaybankHeaders(tokenToUse, operation);
       
-      // Build the complete URL
-      const url = await this.buildURL(operation, parameters);
+      // Declare these variables early so they're available for buildURL
+      let queryParams = {};
       
-      // Determine method and body based on operation
+      // Build the complete URL (will be updated with query params later)
+      let url = await this.buildURL(operation, parameters);
+      
+      // Phase 4.8 Checkpoint 2: Use schema-based request builder
       let method = 'GET';
       let body = null;
       
-      if (operation === 'post_bill_getBillsTxnHistory') {
-        method = 'POST';
-        // Extract request body from parameters
-        body = {
-          payeeCode: parameters.payeeCode || "1111",
-          billAcctNo: parameters.billAcctNo || "210027549604", 
-          favBillPaymentStep2: parameters.favBillPaymentStep2 || "17",
-          gstNotesFavPaymentStep2: parameters.gstNotesFavPaymentStep2 || "gstnotesfavpaystep2",
-          fullName: parameters.fullName || "Tenaga Nasional Berhad",
-          shortName: parameters.shortName || "Tenaga Nasional Berhad"
-        };
-        // Add Content-Type for POST requests
-        headers['Content-Type'] = 'application/json';
+      if (this.registry && this.requestBuilder) {
+        const operationDetails = this.registry.getOperation(operation);
+        if (operationDetails) {
+          // Build complete request from schema
+          const schemaRequest = this.requestBuilder.buildRequest(operationDetails, parameters);
+          
+          method = schemaRequest.method;
+          body = schemaRequest.body;
+          queryParams = schemaRequest.queryParams;
+          
+          // Merge schema headers with Maybank headers (Maybank headers take precedence)
+          headers = { ...schemaRequest.headers, ...headers };
+          
+          logger.info('Phase 4.8: Request built from schema', { 
+            operation, 
+            method,
+            hasBody: !!body,
+            queryParamCount: Object.keys(queryParams).length,
+            headerCount: Object.keys(headers).length
+          });
+          
+          // Rebuild URL with query parameters if needed
+          if (Object.keys(queryParams).length > 0) {
+            url = await this.buildURL(operation, parameters, queryParams);
+          }
+        }
+      }
+      
+      // Fallback to hardcoded logic if registry not available
+      if (!this.registry || !this.registry.getOperation(operation)) {
+        if (operation === 'post_bill_getBillsTxnHistory') {
+          method = 'POST';
+          // Extract request body from parameters
+          body = {
+            payeeCode: parameters.payeeCode || "1111",
+            billAcctNo: parameters.billAcctNo || "210027549604", 
+            favBillPaymentStep2: parameters.favBillPaymentStep2 || "17",
+            gstNotesFavPaymentStep2: parameters.gstNotesFavPaymentStep2 || "gstnotesfavpaystep2",
+            fullName: parameters.fullName || "Tenaga Nasional Berhad",
+            shortName: parameters.shortName || "Tenaga Nasional Berhad"
+          };
+          // Add Content-Type for POST requests
+          headers['Content-Type'] = 'application/json';
+        }
       }
       
       const preparedRequest = {
@@ -143,7 +184,7 @@ export class MaybankAdapter {
 
     logger.debug('Built Maybank headers', {
       headerKeys: Object.keys(headers),
-      hasAuth: headers.Authorization && headers.Authorization.startsWith('Bearer '),
+      hasAuth: headers.authorization && headers.authorization.startsWith('bearer '),
       hasMayaAuth: headers['maya-authorization'] && headers['maya-authorization'].startsWith('bearer '),
       sessionTraceLength: sessionTraceId.length,
       operationId: operationId
@@ -155,52 +196,70 @@ export class MaybankAdapter {
   /**
    * Build URL for Maybank operations
    */
-  async buildURL(operationId, parameters = {}) {
+  async buildURL(operationId, parameters = {}, queryParams = {}) {
     try {
       let path = '';
       
-      // Map operation IDs to endpoints
-      switch (operationId) {
-        case 'get_banking_getBalance':
-          path = '/banking/v1/summary/getBalance';
-          break;
-        case 'get_banking_summary':
-          path = '/banking/v1/summary';
-          break;
-        case 'get_banking_all':
-          path = '/banking/v1/accounts/all';
-          break;
-        case 'get_payment_favList_1':
-          path = '/payment/v1/pay/bill/favList';
-          break;
-        case 'post_bill_getBillsTxnHistory':
-          path = '/bill/v2/bills/getBillsTxnHistory';
-          break;
-        default:
-          throw new Error(`Unknown Maybank operation: ${operationId}`);
+      // Phase 4.8: Dynamic URL resolution from registry
+      if (this.registry) {
+        const operation = this.registry.getOperation(operationId);
+        if (operation) {
+          path = operation.path;
+          logger.info('Phase 4.8: URL resolved from registry', { operationId, path, method: operation.method });
+        }
+      }
+      
+      // Fallback to hardcoded mapping if registry not available
+      if (!path) {
+        switch (operationId) {
+          case 'get_banking_getBalance':
+            path = '/banking/v1/summary/getBalance';
+            break;
+          case 'get_banking_summary':
+            path = '/banking/v1/summary';
+            break;
+          case 'get_banking_all':
+            path = '/banking/v1/accounts/all';
+            break;
+          case 'get_payment_favList_1':
+            path = '/payment/v1/pay/bill/favList';
+            break;
+          case 'post_bill_getBillsTxnHistory':
+            path = '/bill/v2/bills/getBillsTxnHistory';
+            break;
+          default:
+            throw new Error(`Unknown Maybank operation: ${operationId}`);
+        }
       }
 
       // Build query parameters
-      const queryParams = new URLSearchParams();
+      const urlParams = new URLSearchParams();
       
-      // Add operation-specific parameters
-      if (operationId === 'get_banking_getBalance' && parameters.isFirstLoad) {
-        queryParams.append('isFirstLoad', parameters.isFirstLoad);
-      }
-      
-      if (operationId === 'get_banking_summary' && parameters.type) {
-        queryParams.append('type', parameters.type);
+      // Phase 4.8: Use provided queryParams if available
+      if (queryParams && Object.keys(queryParams).length > 0) {
+        for (const [key, value] of Object.entries(queryParams)) {
+          urlParams.append(key, value);
+        }
+      } else {
+        // Fallback to hardcoded operation-specific parameters
+        if (operationId === 'get_banking_getBalance' && parameters.isFirstLoad) {
+          urlParams.append('isFirstLoad', parameters.isFirstLoad);
+        }
+        
+        if (operationId === 'get_banking_summary' && parameters.type) {
+          urlParams.append('type', parameters.type);
+        }
       }
 
       // Construct full URL
       const baseUrl = `https://${this.MAYBANK_SERVER}${path}`;
-      const queryString = queryParams.toString();
+      const queryString = urlParams.toString();
       const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
       logger.debug('Built Maybank URL', {
         operationId,
         path,
-        queryParams: Object.fromEntries(queryParams),
+        queryParams: queryParams,
         fullUrl
       });
 
@@ -242,10 +301,36 @@ export class MaybankAdapter {
   }
 
   /**
-   * Validate Maybank API response
+   * Validate Maybank API response using schema-based validation
    */
-  async validateResponse(responseData, operationId) {
+  async validateResponse(responseData, operationId, statusCode = 200) {
     try {
+      // Phase 4.8 Checkpoint 3: Use schema-based validation
+      if (this.registry && this.responseValidator) {
+        const operation = this.registry.getOperation(operationId);
+        if (operation) {
+          const validation = this.responseValidator.validateResponse(operation, responseData, statusCode);
+          
+          logger.info('Phase 4.8: Response validated with schema', {
+            operationId,
+            valid: validation.valid,
+            errorCount: validation.errors.length,
+            hasExtractedData: !!validation.extractedData
+          });
+          
+          return {
+            isValid: validation.valid,
+            extractedData: validation.extractedData,
+            rawData: validation.rawData,
+            error: validation.errors.length > 0 ? validation.errors.join('; ') : null,
+            validationErrors: validation.errors
+          };
+        }
+      }
+
+      // Fallback to hardcoded validation logic
+      logger.debug('Falling back to hardcoded response validation', { operationId });
+
       // Check basic response structure
       if (!responseData || typeof responseData !== 'object') {
         return {
@@ -273,13 +358,6 @@ export class MaybankAdapter {
       const isBillApi = responseData.statusCode !== undefined && responseData.statusDesc !== undefined;
       
       if (isPaymentApi && (responseData.message !== 'success' || responseData.code !== 0)) {
-        // Log the actual response for debugging
-        logger.error('Maybank API returned error response', {
-          message: responseData.message,
-          code: responseData.code,
-          fullResponse: responseData
-        });
-        
         return {
           isValid: false,
           error: `Maybank API error: ${responseData.message || 'Unknown error'} (code: ${responseData.code || 'Unknown'})`
@@ -287,81 +365,18 @@ export class MaybankAdapter {
       }
       
       if (isBillApi && (responseData.statusCode !== "0000" || responseData.statusDesc !== "Successful")) {
-        // Log the actual response for debugging
-        logger.error('Maybank Bill API returned error response', {
-          statusCode: responseData.statusCode,
-          statusDesc: responseData.statusDesc,
-          fullResponse: responseData
-        });
-        
         return {
           isValid: false,
           error: `Maybank Bill API error: ${responseData.statusDesc || 'Unknown error'} (code: ${responseData.statusCode || 'Unknown'})`
         };
       }
 
-      // Extract data based on operation
-      let extractedData = {};
+      // Fallback data extraction (minimal)
+      const isValid = true;
       
-      switch (operationId) {
-        case 'get_banking_getBalance':
-          if (responseData.result && responseData.result.balance) {
-            extractedData = {
-              balance: responseData.result.balance,
-              currentBalance: responseData.result.currentBalance,
-              accountName: responseData.result.name,
-              accountCode: responseData.result.code,
-              value: responseData.result.value
-            };
-          }
-          break;
-          
-        case 'get_banking_summary':
-          if (responseData.result && responseData.result.accountListings) {
-            extractedData = {
-              total: responseData.result.total,
-              accountCount: responseData.result.accountListings.length,
-              accounts: responseData.result.accountListings,
-              maeAvailable: responseData.result.maeAvailable
-            };
-          }
-          break;
-          
-        case 'get_banking_all':
-          if (Array.isArray(responseData)) {
-            extractedData = {
-              accounts: responseData,
-              accountCount: responseData.length
-            };
-          }
-          break;
-          
-        case 'post_bill_getBillsTxnHistory':
-          if (responseData.statusCode === "0000") {
-            extractedData = {
-              statusCode: responseData.statusCode,
-              statusDesc: responseData.statusDesc,
-              effectiveDateList: responseData.populateEffectiveDateList || [],
-              ebpp: responseData.ebpp,
-              companyHeader: responseData.ebppData?.companyHeader,
-              lastThreePayment: responseData.lastThreePayment || [],
-              gstComplianceNotes: responseData.gstComplianceNotes
-            };
-          }
-          break;
-      }
-
-      const isValid = Object.keys(extractedData).length > 0;
-      
-      logger.debug('Validated Maybank response', {
-        operationId,
-        isValid,
-        dataKeys: Object.keys(extractedData)
-      });
-
       return {
         isValid,
-        extractedData,
+        extractedData: responseData,
         rawData: responseData
       };
 
