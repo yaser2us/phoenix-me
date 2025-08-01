@@ -1,0 +1,401 @@
+{
+  "responseTemplates": {
+    "financial_overview": {
+      "name": "Financial Overview Template",
+      "description": "Template for comprehensive financial data presentation",
+      "sections": [
+        {
+          "id": "balance_summary",
+          "title": "Account Balance",
+          "type": "metric",
+          "format": "currency",
+          "source": "banking.balance"
+        },
+        {
+          "id": "recent_activity",
+          "title": "Recent Activity",
+          "type": "list",
+          "format": "transactions",
+          "source": "banking.transactions"
+        },
+        {
+          "id": "financial_insights",
+          "title": "Key Insights",
+          "type": "insights",
+          "format": "bullet_points",
+          "source": "insights.financial"
+        }
+      ],
+      "formatting": {
+        "currency": "MYR",
+        "dateFormat": "DD/MM/YYYY",
+        "numberFormat": "en-MY"
+      }
+    },
+    
+    "weather_financial": {
+      "name": "Weather-Adjusted Financial Template",
+      "description": "Template combining financial and weather data for contextual insights",
+      "sections": [
+        {
+          "id": "weather_context",
+          "title": "Current Weather",
+          "type": "weather_card",
+          "format": "temperature_condition",
+          "source": "weather"
+        },
+        {
+          "id": "spending_impact",
+          "title": "Weather Impact on Spending",
+          "type": "analysis",
+          "format": "correlation",
+          "source": "insights.weather_spending"
+        },
+        {
+          "id": "recommendations",
+          "title": "Weather-Based Recommendations",
+          "type": "recommendations",
+          "format": "action_list",
+          "source": "recommendations.weather"
+        }
+      ],
+      "contextualRules": [
+        {
+          "condition": "weather.temperature > 30",
+          "action": "highlight_cooling_costs",
+          "message": "Hot weather may increase cooling expenses"
+        },
+        {
+          "condition": "weather.condition.includes('rain')",
+          "action": "suggest_indoor_activities",
+          "message": "Rainy weather - consider indoor entertainment options"
+        }
+      ]
+    },
+    
+    "comprehensive_dashboard": {
+      "name": "Comprehensive Dashboard Template",
+      "description": "All-in-one dashboard with multiple data sources",
+      "layout": "grid",
+      "sections": [
+        {
+          "id": "financial_summary",
+          "title": "Financial Summary",
+          "type": "card",
+          "position": { "row": 0, "col": 0, "span": 2 },
+          "source": "banking"
+        },
+        {
+          "id": "weather_card",
+          "title": "Weather",
+          "type": "card",
+          "position": { "row": 0, "col": 2, "span": 1 },
+          "source": "weather"
+        },
+        {
+          "id": "currency_rates",
+          "title": "Exchange Rates",
+          "type": "card",
+          "position": { "row": 1, "col": 0, "span": 1 },
+          "source": "currency"
+        },
+        {
+          "id": "insights_panel",
+          "title": "Key Insights",
+          "type": "panel",
+          "position": { "row": 1, "col": 1, "span": 2 },
+          "source": "insights"
+        },
+        {
+          "id": "recommendations_panel",
+          "title": "Recommendations",
+          "type": "panel",
+          "position": { "row": 2, "col": 0, "span": 3 },
+          "source": "recommendations"
+        }
+      ]
+    }
+  },
+  
+  "visualizationTemplates": {
+    "balance_gauge": {
+      "type": "gauge",
+      "title": "Account Balance Health",
+      "config": {
+        "min": 0,
+        "max": 100000,
+        "ranges": [
+          { "from": 0, "to": 2000, "color": "red", "label": "Critical" },
+          { "from": 2000, "to": 10000, "color": "yellow", "label": "Moderate" },
+          { "from": 10000, "to": 100000, "color": "green", "label": "Healthy" }
+        ],
+        "unit": "MYR"
+      }
+    },
+    
+    "spending_trends": {
+      "type": "line_chart",
+      "title": "Spending Trends",
+      "config": {
+        "xAxis": "date",
+        "yAxis": "amount",
+        "smoothing": true,
+        "trendLine": true,
+        "colors": ["#3498db", "#e74c3c", "#2ecc71"]
+      }
+    },
+    
+    "category_breakdown": {
+      "type": "pie_chart",
+      "title": "Spending by Category",
+      "config": {
+        "showLegend": true,
+        "showPercentages": true,
+        "colors": ["#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6"]
+      }
+    },
+    
+    "weather_temperature": {
+      "type": "thermometer",
+      "title": "Current Temperature",
+      "config": {
+        "min": 0,
+        "max": 50,
+        "unit": "°C",
+        "ranges": [
+          { "from": 0, "to": 20, "color": "blue", "label": "Cool" },
+          { "from": 20, "to": 30, "color": "green", "label": "Comfortable" },
+          { "from": 30, "to": 50, "color": "red", "label": "Hot" }
+        ]
+      }
+    }
+  },
+  
+  "formatRules": {
+    "currency": {
+      "MYR": {
+        "symbol": "RM",
+        "position": "prefix",
+        "decimals": 2,
+        "thousandsSeparator": ",",
+        "decimalSeparator": "."
+      },
+      "USD": {
+        "symbol": "$",
+        "position": "prefix",
+        "decimals": 2,
+        "thousandsSeparator": ",",
+        "decimalSeparator": "."
+      }
+    },
+    
+    "dateTime": {
+      "short": "DD/MM/YYYY",
+      "long": "DD MMMM YYYY",
+      "withTime": "DD/MM/YYYY HH:mm"
+    },
+    
+    "numbers": {
+      "compact": {
+        "threshold": 1000,
+        "suffixes": ["", "K", "M", "B"]
+      },
+      "percentage": {
+        "decimals": 1,
+        "symbol": "%"
+      }
+    }
+  },
+  
+  "responsiveBreakpoints": {
+    "mobile": {
+      "maxWidth": 768,
+      "modifications": {
+        "layout": "single_column",
+        "fontSize": "14px",
+        "cardSpacing": "8px",
+        "hideSecondaryInfo": true
+      }
+    },
+    
+    "tablet": {
+      "minWidth": 769,
+      "maxWidth": 1024,
+      "modifications": {
+        "layout": "two_column",
+        "fontSize": "16px",
+        "cardSpacing": "12px"
+      }
+    },
+    
+    "desktop": {
+      "minWidth": 1025,
+      "modifications": {
+        "layout": "grid",
+        "fontSize": "16px",
+        "cardSpacing": "16px",
+        "showAllInfo": true
+      }
+    }
+  },
+  
+  "accessibilityOptions": {
+    "colorBlindFriendly": {
+      "enabled": true,
+      "colorPalette": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
+    },
+    
+    "screenReader": {
+      "enabled": true,
+      "altTextTemplates": {
+        "chart": "{title}: {type} showing {description}",
+        "metric": "{label}: {value} {unit}",
+        "insight": "Insight: {text}"
+      }
+    },
+    
+    "keyboardNavigation": {
+      "enabled": true,
+      "focusIndicators": true,
+      "skipLinks": true
+    },
+    
+    "fontSize": {
+      "scalable": true,
+      "minSize": "12px",
+      "maxSize": "24px"
+    }
+  },
+  
+  "internationalization": {
+    "languages": {
+      "en": {
+        "name": "English",
+        "dateFormat": "MM/DD/YYYY",
+        "numberFormat": "en-US",
+        "currency": "USD"
+      },
+      "ms": {
+        "name": "Bahasa Malaysia",
+        "dateFormat": "DD/MM/YYYY",
+        "numberFormat": "ms-MY",
+        "currency": "MYR"
+      }
+    },
+    
+    "translations": {
+      "en": {
+        "account_balance": "Account Balance",
+        "current_weather": "Current Weather",
+        "recommendations": "Recommendations",
+        "insights": "Insights",
+        "high_priority": "High Priority",
+        "medium_priority": "Medium Priority",
+        "low_priority": "Low Priority"
+      },
+      "ms": {
+        "account_balance": "Baki Akaun",
+        "current_weather": "Cuaca Semasa",
+        "recommendations": "Cadangan",
+        "insights": "Wawasan",
+        "high_priority": "Keutamaan Tinggi",
+        "medium_priority": "Keutamaan Sederhana",
+        "low_priority": "Keutamaan Rendah"
+      }
+    }
+  },
+  
+  "themeOptions": {
+    "light": {
+      "background": "#ffffff",
+      "surface": "#f8f9fa",
+      "primary": "#007bff",
+      "secondary": "#6c757d",
+      "text": "#212529",
+      "border": "#dee2e6"
+    },
+    
+    "dark": {
+      "background": "#1a1a1a",
+      "surface": "#2d2d2d",
+      "primary": "#4dabf7",
+      "secondary": "#868e96",
+      "text": "#ffffff",
+      "border": "#495057"
+    },
+    
+    "highContrast": {
+      "background": "#000000",
+      "surface": "#1a1a1a",
+      "primary": "#ffffff",
+      "secondary": "#cccccc",
+      "text": "#ffffff",
+      "border": "#ffffff"
+    }
+  },
+  
+  "contextualAdaptation": {
+    "timeOfDay": {
+      "morning": {
+        "greeting": "Good morning",
+        "suggestions": ["Review overnight activities", "Plan day ahead"],
+        "priority": "planning"
+      },
+      "afternoon": {
+        "greeting": "Good afternoon",
+        "suggestions": ["Check progress", "Adjust plans"],
+        "priority": "monitoring"
+      },
+      "evening": {
+        "greeting": "Good evening",
+        "suggestions": ["Review day's activities", "Prepare for tomorrow"],
+        "priority": "summary"
+      }
+    },
+    
+    "weather": {
+      "hot": {
+        "icon": "sun",
+        "color": "#ff6b35",
+        "suggestions": ["Budget for cooling costs", "Stay hydrated"]
+      },
+      "cold": {
+        "icon": "snowflake",
+        "color": "#4dabf7",
+        "suggestions": ["Heating cost considerations", "Warm clothing budget"]
+      },
+      "rainy": {
+        "icon": "cloud-rain",
+        "color": "#495057",
+        "suggestions": ["Indoor activities", "Transportation alternatives"]
+      }
+    },
+    
+    "financial_status": {
+      "excellent": {
+        "color": "#28a745",
+        "icon": "check-circle",
+        "tone": "congratulatory",
+        "suggestions": ["Investment opportunities", "Goal expansion"]
+      },
+      "good": {
+        "color": "#17a2b8",
+        "icon": "thumbs-up",
+        "tone": "positive",
+        "suggestions": ["Maintain habits", "Optimize further"]
+      },
+      "warning": {
+        "color": "#ffc107",
+        "icon": "exclamation-triangle",
+        "tone": "cautionary",
+        "suggestions": ["Review expenses", "Increase savings"]
+      },
+      "critical": {
+        "color": "#dc3545",
+        "icon": "alert-circle",
+        "tone": "urgent",
+        "suggestions": ["Immediate action needed", "Seek financial advice"]
+      }
+    }
+  }
+}

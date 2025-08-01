@@ -1,0 +1,27 @@
+{
+  "id": "integration_test_workflow",
+  "name": "Integration Test Smart Workflow",
+  "description": "A test workflow for integration testing",
+  "steps": [
+    {
+      "operation": "testOperation",
+      "params": {}
+    }
+  ],
+  "innovation": {
+    "novelty": 0.9,
+    "value": 0.8,
+    "overall": 0.85
+  },
+  "metadata": {
+    "source": "integration_test",
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "71dc1513",
+      "metadata": "1986636fe9f"
+    },
+    "tags": []
+  },
+  "persistedAt": "2025-08-01T15:18:56.927Z",
+  "version": "1.0"
+}

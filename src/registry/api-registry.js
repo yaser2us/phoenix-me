@@ -187,6 +187,17 @@ export class ApiRegistry {
   }
 
   /**
+   * Get count of registered operations
+   */
+  getOperationCount() {
+    if (!this.initialized) {
+      throw new Error('ApiRegistry not initialized');
+    }
+    
+    return this.operations.size;
+  }
+
+  /**
    * Get components (schemas, etc.) from all registered OpenAPI specs
    * Used for schema resolution and validation
    */

@@ -1,0 +1,92 @@
+{
+  "id": "basic_1754060948978",
+  "name": "Smart Analytics Workflow",
+  "intent": "smart budgeting with market trend analysis",
+  "description": "Intelligent workflow that processes analytics data through 3 optimized steps to provide comprehensive insights.",
+  "pattern": "analytics_low_response_data_response",
+  "steps": [
+    {
+      "operation": "formatResponse",
+      "params": {
+        "format": "summary",
+        "optimized": true,
+        "cacheEnabled": true
+      },
+      "order": 2,
+      "dependencies": [
+        "analyzeData"
+      ],
+      "canRunInParallel": false,
+      "caching": {
+        "enabled": true,
+        "ttl": 3600
+      }
+    },
+    {
+      "operation": "analyzeData",
+      "params": {
+        "optimized": true,
+        "cacheEnabled": true
+      },
+      "order": 1,
+      "dependencies": [],
+      "canRunInParallel": true,
+      "caching": {
+        "enabled": true,
+        "ttl": 3600
+      }
+    },
+    {
+      "operation": "formatResponse",
+      "params": {
+        "format": "summary",
+        "optimized": true,
+        "cacheEnabled": true
+      },
+      "order": 2,
+      "dependencies": [
+        "analyzeData"
+      ],
+      "canRunInParallel": false,
+      "caching": {
+        "enabled": true,
+        "ttl": 3600
+      }
+    }
+  ],
+  "metadata": {
+    "builtFrom": "natural_language",
+    "buildMethod": "smart_builder",
+    "analysis": {
+      "words": {},
+      "domains": [
+        "analytics"
+      ],
+      "intents": [],
+      "complexity": "low",
+      "actionVerbs": [],
+      "entities": [],
+      "confidence": 0.8
+    },
+    "confidence": 0.8999999999999999,
+    "estimatedPerformance": {
+      "estimatedTime": 990,
+      "estimatedSuccessRate": 0.85,
+      "estimatedComplexity": "low"
+    },
+    "builtAt": "2025-08-01T15:09:08.978Z",
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "6c1204bd",
+      "metadata": "198662e05f3"
+    },
+    "tags": [
+      "ai-enhanced",
+      "standard"
+    ]
+  },
+  "type": "basic",
+  "innovationType": "standard",
+  "persistedAt": "2025-08-01T15:09:08.979Z",
+  "version": "1.0"
+}

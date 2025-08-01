@@ -1,0 +1,297 @@
+{
+  "templates": [
+    {
+      "id": "financial_overview",
+      "name": "Financial Overview",
+      "description": "Comprehensive financial status including balance, goals, and spending analysis",
+      "intent_patterns": [
+        "financial overview",
+        "money status",
+        "financial summary",
+        "account overview"
+      ],
+      "required_apis": ["banking"],
+      "optional_apis": ["goals", "currency", "weather"],
+      "steps": [
+        {
+          "id": "get_balance",
+          "operation": "get_banking_getBalance",
+          "description": "Get current account balance",
+          "priority": 1
+        },
+        {
+          "id": "get_goals",
+          "operation": "get_goals_current",
+          "description": "Get current financial goals",
+          "priority": 2
+        },
+        {
+          "id": "synthesize_financial",
+          "operation": "synthesize_financial_overview",
+          "description": "Combine financial data for comprehensive overview",
+          "priority": 3,
+          "dependencies": ["get_balance", "get_goals"]
+        }
+      ],
+      "data_flow": [
+        {
+          "from": "get_balance",
+          "to": "synthesize_financial",
+          "field": "balance_data"
+        },
+        {
+          "from": "get_goals",
+          "to": "synthesize_financial", 
+          "field": "goals_data"
+        }
+      ]
+    },
+    {
+      "id": "weather_financial",
+      "name": "Weather-Adjusted Financial Analysis",
+      "description": "Financial analysis considering weather impact on spending patterns",
+      "intent_patterns": [
+        "weather financial",
+        "spending weather",
+        "financial weather analysis",
+        "money weather impact"
+      ],
+      "required_apis": ["banking", "weather"],
+      "optional_apis": ["goals", "currency"],
+      "steps": [
+        {
+          "id": "get_balance",
+          "operation": "get_banking_getBalance",
+          "description": "Get current account balance",
+          "priority": 1
+        },
+        {
+          "id": "get_weather",
+          "operation": "get_weather_current",
+          "description": "Get current weather conditions",
+          "priority": 1
+        },
+        {
+          "id": "analyze_weather_spending",
+          "operation": "analyze_weather_spending_patterns",
+          "description": "Analyze how weather affects spending patterns",
+          "priority": 2,
+          "dependencies": ["get_balance", "get_weather"]
+        }
+      ],
+      "data_flow": [
+        {
+          "from": "get_balance",
+          "to": "analyze_weather_spending",
+          "field": "balance_amount"
+        },
+        {
+          "from": "get_weather",
+          "to": "analyze_weather_spending",
+          "field": "weather_conditions"
+        }
+      ]
+    },
+    {
+      "id": "currency_conversion",
+      "name": "Currency Conversion Analysis",
+      "description": "Convert financial amounts with current exchange rates",
+      "intent_patterns": [
+        "currency conversion",
+        "exchange rate",
+        "convert money",
+        "usd rate"
+      ],
+      "required_apis": ["banking", "currency"],
+      "optional_apis": ["news"],
+      "steps": [
+        {
+          "id": "get_balance",
+          "operation": "get_banking_getBalance",
+          "description": "Get account balance in local currency",
+          "priority": 1
+        },
+        {
+          "id": "get_rates",
+          "operation": "get_currency_rates",
+          "description": "Get current exchange rates",
+          "priority": 1
+        },
+        {
+          "id": "convert_currency",
+          "operation": "convert_balance_currency",
+          "description": "Convert balance using current rates",
+          "priority": 2,
+          "dependencies": ["get_balance", "get_rates"]
+        }
+      ],
+      "data_flow": [
+        {
+          "from": "get_balance",
+          "to": "convert_currency",
+          "field": "balance_amount"
+        },
+        {
+          "from": "get_rates",
+          "to": "convert_currency",
+          "field": "exchange_rate"
+        }
+      ]
+    },
+    {
+      "id": "payment_overview",
+      "name": "Payment and Bills Overview",
+      "description": "Overview of payment history and bill payment options",
+      "intent_patterns": [
+        "payment overview",
+        "bill payment",
+        "payment history",
+        "bills status"
+      ],
+      "required_apis": ["payment"],
+      "optional_apis": ["banking", "goals"],
+      "steps": [
+        {
+          "id": "get_payment_favorites",
+          "operation": "get_payment_favList_1",
+          "description": "Get favorite payment list",
+          "priority": 1
+        },
+        {
+          "id": "get_bill_history",
+          "operation": "post_bill_getBillsTxnHistory",
+          "description": "Get bill transaction history",
+          "priority": 2
+        },
+        {
+          "id": "summarize_payments",
+          "operation": "summarize_payment_overview",
+          "description": "Summarize payment and bill information",
+          "priority": 3,
+          "dependencies": ["get_payment_favorites", "get_bill_history"]
+        }
+      ],
+      "data_flow": [
+        {
+          "from": "get_payment_favorites",
+          "to": "summarize_payments",
+          "field": "favorite_payments"
+        },
+        {
+          "from": "get_bill_history",
+          "to": "summarize_payments",
+          "field": "bill_history"
+        }
+      ]
+    },
+    {
+      "id": "comprehensive_dashboard",
+      "name": "Comprehensive Financial Dashboard",
+      "description": "Complete financial dashboard with all available information",
+      "intent_patterns": [
+        "complete overview",
+        "financial dashboard",
+        "everything financial",
+        "comprehensive analysis"
+      ],
+      "required_apis": ["banking"],
+      "optional_apis": ["weather", "currency", "payment", "goals", "news"],
+      "steps": [
+        {
+          "id": "get_balance",
+          "operation": "get_banking_getBalance",
+          "description": "Get account balance",
+          "priority": 1
+        },
+        {
+          "id": "get_weather",
+          "operation": "get_weather_current",
+          "description": "Get weather for spending context",
+          "priority": 1
+        },
+        {
+          "id": "get_currency",
+          "operation": "get_currency_rates",
+          "description": "Get exchange rates",
+          "priority": 1
+        },
+        {
+          "id": "get_payments",
+          "operation": "get_payment_favList_1",
+          "description": "Get payment options",
+          "priority": 2
+        },
+        {
+          "id": "create_dashboard",
+          "operation": "create_comprehensive_dashboard",
+          "description": "Combine all data into comprehensive dashboard",
+          "priority": 3,
+          "dependencies": ["get_balance", "get_weather", "get_currency", "get_payments"]
+        }
+      ],
+      "data_flow": [
+        {
+          "from": "get_balance",
+          "to": "create_dashboard",
+          "field": "financial_data"
+        },
+        {
+          "from": "get_weather",
+          "to": "create_dashboard",
+          "field": "weather_context"
+        },
+        {
+          "from": "get_currency",
+          "to": "create_dashboard",
+          "field": "currency_rates"
+        },
+        {
+          "from": "get_payments",
+          "to": "create_dashboard",
+          "field": "payment_options"
+        }
+      ]
+    }
+  ],
+  "template_usage_guidelines": {
+    "matching_strategy": "Use intent_patterns to match user requests to appropriate templates",
+    "customization": "Templates can be customized based on available APIs and user preferences",
+    "fallback": "If no template matches, use dynamic composition based on intent analysis",
+    "combination": "Templates can be combined for complex multi-domain requests"
+  },
+  "synthetic_operations": {
+    "description": "These operations are created dynamically by the composition system",
+    "operations": [
+      {
+        "id": "synthesize_financial_overview",
+        "description": "Combine multiple financial data sources into coherent overview",
+        "inputs": ["balance_data", "goals_data", "transaction_data"],
+        "output": "comprehensive_financial_summary"
+      },
+      {
+        "id": "analyze_weather_spending_patterns",
+        "description": "Analyze correlation between weather and spending patterns",
+        "inputs": ["balance_amount", "weather_conditions", "historical_spending"],
+        "output": "weather_spending_analysis"
+      },
+      {
+        "id": "convert_balance_currency",
+        "description": "Convert account balance to specified currency",
+        "inputs": ["balance_amount", "exchange_rate", "target_currency"],
+        "output": "converted_balance"
+      },
+      {
+        "id": "summarize_payment_overview",
+        "description": "Create summary of payment options and history",
+        "inputs": ["favorite_payments", "bill_history", "payment_capabilities"],
+        "output": "payment_summary"
+      },
+      {
+        "id": "create_comprehensive_dashboard",
+        "description": "Create complete financial dashboard with all available data",
+        "inputs": ["financial_data", "weather_context", "currency_rates", "payment_options"],
+        "output": "comprehensive_dashboard"
+      }
+    ]
+  }
+}

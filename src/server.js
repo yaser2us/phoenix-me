@@ -39,6 +39,28 @@ import { ValidationErrorFormatter } from './validation/validation-error-formatte
 import { AdvancedValidator } from './validation/advanced-validator.js';
 import { RetryManager } from './execution/retry-manager.js';
 
+// PHASE 4.9: Dynamic API Composition & Learning System
+import { CompositionCoordinator } from './composition/composition-coordinator.js';
+import { ApiCatalogProvider } from './composition/api-catalog-provider.js';
+import { ClaudeWorkflowComposer } from './composition/claude-workflow-composer.js';
+import { WorkflowPlanParser } from './composition/workflow-plan-parser.js';
+import { DynamicWorkflowExecutor } from './execution/dynamic-workflow-executor.js';
+import { DataFlowManager } from './execution/data-flow-manager.js';
+import { WorkflowOrchestrator } from './execution/workflow-orchestrator.js';
+import { AdaptiveErrorRecovery } from './execution/adaptive-error-recovery.js';
+import { AiResponseSynthesizer } from './fusion/ai-response-synthesizer.js';
+import { ContextFusionEngine } from './fusion/context-fusion-engine.js';
+import { InsightGenerator } from './fusion/insight-generator.js';
+import { AdaptiveFormatter } from './fusion/adaptive-formatter.js';
+import { WorkflowMemoryManager } from './learning/workflow-memory-manager.js';
+import { PatternRecognizer } from './learning/pattern-recognizer.js';
+import { SuccessMetricsTracker } from './learning/success-metrics-tracker.js';
+import { AdaptiveLearner } from './learning/adaptive-learner.js';
+import { InnovationEngine } from './innovation/innovation-engine.js';
+import { WorkflowPersistenceManager } from './innovation/workflow-persistence-manager.js';
+import { SmartWorkflowBuilder } from './innovation/smart-workflow-builder.js';
+import { UsageAnalytics } from './innovation/usage-analytics.js';
+
 class MCPGatewayServer {
   constructor() {
     this.server = new Server(
@@ -70,6 +92,28 @@ class MCPGatewayServer {
     this.conversationManager = null;
     this.uxEnhancements = null;
     this.workflowIntelligence = null;
+    
+    // PHASE 4.9: Dynamic API Composition & Learning System
+    this.compositionCoordinator = null;
+    this.catalogProvider = null;
+    this.workflowComposer = null;
+    this.planParser = null;
+    this.dynamicExecutor = null;
+    this.dataFlowManager = null;
+    this.workflowOrchestrator = null;
+    this.adaptiveErrorRecovery = null;
+    this.responseSynthesizer = null;
+    this.contextFusion = null;
+    this.insightGenerator = null;
+    this.adaptiveFormatter = null;
+    this.memoryManager = null;
+    this.patternRecognizer = null;
+    this.metricsTracker = null;
+    this.adaptiveLearner = null;
+    this.innovationEngine = null;
+    this.persistenceManager = null;
+    this.smartBuilder = null;
+    this.usageAnalytics = null;
     
     // Set up MCP handlers in constructor
     this.setupMCPHandlers();
@@ -155,6 +199,9 @@ class MCPGatewayServer {
       
       // 6.5. PHASE 4.7: Initialize enhanced validation and retry system
       await this.initializePhase47Components();
+      
+      // 6.6. PHASE 4.9: Initialize Dynamic API Composition & Learning System
+      await this.initializePhase49Components();
       
       // 7. Register MCP tools dynamically (including all workflow and interactive tools)
       await this.setupMCPTools();
@@ -264,6 +311,108 @@ class MCPGatewayServer {
     }
   }
 
+  // PHASE 4.9: Initialize Dynamic API Composition & Learning System
+  async initializePhase49Components() {
+    try {
+      logger.info('Initializing Phase 4.9 Dynamic API Composition & Learning System...');
+
+      // 1. Initialize composition layer components
+      this.catalogProvider = new ApiCatalogProvider(this.registry);
+      logger.info('API catalog provider initialized');
+
+      this.workflowComposer = new ClaudeWorkflowComposer();
+      logger.info('Claude workflow composer initialized');
+
+      this.planParser = new WorkflowPlanParser();
+      logger.info('Workflow plan parser initialized');
+
+      this.compositionCoordinator = new CompositionCoordinator(
+        this.catalogProvider,
+        this.workflowComposer,
+        this.planParser
+      );
+      logger.info('Composition coordinator initialized');
+
+      // 2. Initialize execution layer components
+      this.dataFlowManager = new DataFlowManager();
+      logger.info('Data flow manager initialized');
+
+      this.adaptiveErrorRecovery = new AdaptiveErrorRecovery();
+      logger.info('Adaptive error recovery initialized');
+
+      this.workflowOrchestrator = new WorkflowOrchestrator(
+        this.dataFlowManager,
+        this.adaptiveErrorRecovery
+      );
+      logger.info('Workflow orchestrator initialized');
+
+      this.dynamicExecutor = new DynamicWorkflowExecutor(
+        this.registry,
+        this.workflowOrchestrator,
+        this.executor
+      );
+      logger.info('Dynamic workflow executor initialized');
+
+      // 3. Initialize fusion layer components
+      this.responseSynthesizer = new AiResponseSynthesizer();
+      logger.info('AI response synthesizer initialized');
+
+      this.contextFusion = new ContextFusionEngine();
+      logger.info('Context fusion engine initialized');
+
+      this.insightGenerator = new InsightGenerator();
+      logger.info('Insight generator initialized');
+
+      this.adaptiveFormatter = new AdaptiveFormatter();
+      logger.info('Adaptive formatter initialized');
+
+      // 4. Initialize learning layer components
+      this.memoryManager = new WorkflowMemoryManager();
+      logger.info('Workflow memory manager initialized');
+
+      this.patternRecognizer = new PatternRecognizer();
+      logger.info('Pattern recognizer initialized');
+
+      this.metricsTracker = new SuccessMetricsTracker();
+      logger.info('Success metrics tracker initialized');
+
+      this.adaptiveLearner = new AdaptiveLearner(
+        this.memoryManager,
+        this.patternRecognizer,
+        this.metricsTracker
+      );
+      logger.info('Adaptive learner initialized');
+
+      // 5. Initialize innovation layer components
+      this.persistenceManager = new WorkflowPersistenceManager();
+      logger.info('Workflow persistence manager initialized');
+
+      this.usageAnalytics = new UsageAnalytics();
+      logger.info('Usage analytics initialized');
+
+      this.smartBuilder = new SmartWorkflowBuilder(
+        this.registry,
+        this.memoryManager,
+        this.patternRecognizer
+      );
+      logger.info('Smart workflow builder initialized');
+
+      this.innovationEngine = new InnovationEngine(
+        this.persistenceManager,
+        this.smartBuilder,
+        this.usageAnalytics,
+        this.adaptiveLearner
+      );
+      logger.info('Innovation engine initialized');
+
+      logger.info('✅ Phase 4.9 Dynamic API Composition & Learning System initialized successfully');
+
+    } catch (error) {
+      logger.error('Failed to initialize Phase 4.9 components', { error: error.message });
+      throw new Error(`Phase 4.9 initialization failed: ${error.message}`);
+    }
+  }
+
   async setupMCPTools() {
     try {
       logger.info('Setting up MCP tools...');
@@ -315,6 +464,13 @@ class MCPGatewayServer {
         const validationTools = this.createValidationTools();
         tools.push(...validationTools);
         logger.info('Added Phase 4.7 validation tools', { count: validationTools.length });
+      }
+
+      // PHASE 4.9: Add dynamic API composition and learning tools
+      if (this.innovationEngine && this.compositionCoordinator && this.dynamicExecutor) {
+        const phase49Tools = this.createPhase49Tools();
+        tools.push(...phase49Tools);
+        logger.info('Added Phase 4.9 dynamic composition tools', { count: phase49Tools.length });
       }
       
       // Store tools for the handlers (set up in constructor)
@@ -701,6 +857,227 @@ class MCPGatewayServer {
     return validationTools;
   }
 
+  // PHASE 4.9: Create dynamic API composition and learning tools for MCP
+  createPhase49Tools() {
+    const phase49Tools = [
+      // Tool 1: Compose workflow from natural language
+      {
+        name: "compose_intelligent_workflow",
+        description: "Use AI to compose innovative workflows from natural language requests that combine multiple APIs",
+        inputSchema: {
+          type: "object",
+          properties: {
+            userRequest: {
+              type: "string",
+              description: "Natural language description of what you want to accomplish"
+            },
+            context: {
+              type: "object",
+              description: "Additional context (user preferences, location, etc.)",
+              additionalProperties: true
+            },
+            innovationLevel: {
+              type: "string",
+              description: "Level of innovation desired",
+              enum: ["standard", "enhanced", "innovative", "cutting_edge"],
+              default: "enhanced"
+            }
+          },
+          required: ["userRequest"]
+        }
+      },
+
+      // Tool 2: Execute dynamic workflow
+      {
+        name: "execute_dynamic_workflow",
+        description: "Execute a dynamically composed workflow with cross-API data flow and adaptive error recovery",
+        inputSchema: {
+          type: "object",
+          properties: {
+            workflowPlan: {
+              type: "object",
+              description: "The workflow plan to execute",
+              additionalProperties: true
+            },
+            parameters: {
+              type: "object",
+              description: "Parameters for workflow execution",
+              additionalProperties: true
+            },
+            enableLearning: {
+              type: "boolean",
+              description: "Enable learning from execution results",
+              default: true
+            }
+          },
+          required: ["workflowPlan"]
+        }
+      },
+
+      // Tool 3: Get workflow recommendations
+      {
+        name: "get_intelligent_workflow_recommendations",
+        description: "Get AI-powered workflow recommendations based on user intent and learned patterns",
+        inputSchema: {
+          type: "object",
+          properties: {
+            userIntent: {
+              type: "string",
+              description: "User's intent or goal"
+            },
+            context: {
+              type: "object",
+              description: "User context and preferences",
+              additionalProperties: true
+            },
+            includeInnovative: {
+              type: "boolean",
+              description: "Include innovative workflow suggestions",
+              default: true
+            }
+          },
+          required: ["userIntent"]
+        }
+      },
+
+      // Tool 4: Discover workflow innovations
+      {
+        name: "discover_workflow_innovations",
+        description: "Discover and create innovative workflow combinations that haven't been seen before",
+        inputSchema: {
+          type: "object",
+          properties: {
+            problemDescription: {
+              type: "string",
+              description: "Description of the problem or use case"
+            },
+            creativityLevel: {
+              type: "number",
+              description: "Creativity level from 0.1 to 1.0",
+              minimum: 0.1,
+              maximum: 1.0,
+              default: 0.7
+            },
+            domainHints: {
+              type: "array",
+              description: "Domains to consider for innovation",
+              items: { type: "string" }
+            }
+          },
+          required: ["problemDescription"]
+        }
+      },
+
+      // Tool 5: Get workflow library
+      {
+        name: "get_workflow_library",
+        description: "Browse the persistent workflow library with filtering and sorting options",
+        inputSchema: {
+          type: "object",
+          properties: {
+            filterBy: {
+              type: "object",
+              description: "Filters to apply",
+              properties: {
+                innovationType: { type: "string" },
+                minNovelty: { type: "number", minimum: 0, maximum: 1 },
+                tags: { type: "array", items: { type: "string" } }
+              }
+            },
+            sortBy: {
+              type: "string",
+              description: "Sort criteria",
+              enum: ["innovation", "novelty", "usage", "recent"],
+              default: "innovation"
+            },
+            limit: {
+              type: "number",
+              description: "Maximum number of workflows to return",
+              minimum: 1,
+              maximum: 50,
+              default: 10
+            }
+          }
+        }
+      },
+
+      // Tool 6: Analyze workflow patterns
+      {
+        name: "analyze_workflow_patterns",
+        description: "Analyze patterns in workflow usage and success to identify optimization opportunities",
+        inputSchema: {
+          type: "object",
+          properties: {
+            timeframe: {
+              type: "string",
+              description: "Time frame for analysis",
+              enum: ["1d", "7d", "30d", "90d"],
+              default: "30d"
+            },
+            includeRecommendations: {
+              type: "boolean",
+              description: "Include optimization recommendations",
+              default: true
+            }
+          }
+        }
+      },
+
+      // Tool 7: Save workflow innovation
+      {
+        name: "save_workflow_innovation",
+        description: "Save an innovative workflow to the persistent library for future reuse",
+        inputSchema: {
+          type: "object",
+          properties: {
+            workflow: {
+              type: "object",
+              description: "The workflow to save",
+              additionalProperties: true
+            },
+            metadata: {
+              type: "object",
+              description: "Additional metadata about the workflow",
+              additionalProperties: true
+            }
+          },
+          required: ["workflow"]
+        }
+      },
+
+      // Tool 8: Get fusion insights
+      {
+        name: "get_fusion_insights",
+        description: "Get intelligent insights by fusing data from multiple API responses",
+        inputSchema: {
+          type: "object",
+          properties: {
+            apiResponses: {
+              type: "array",
+              description: "Array of API responses to fuse",
+              items: { type: "object", additionalProperties: true }
+            },
+            fusionType: {
+              type: "string",
+              description: "Type of fusion to perform",
+              enum: ["contextual", "analytical", "predictive", "comprehensive"],
+              default: "contextual"
+            },
+            outputFormat: {
+              type: "string",
+              description: "Desired output format",
+              enum: ["text", "json", "cards", "chart"],
+              default: "text"
+            }
+          },
+          required: ["apiResponses"]
+        }
+      }
+    ];
+
+    return phase49Tools;
+  }
+
   // PHASE 3: Check if tool is a workflow tool
   isWorkflowTool(toolName) {
     const workflowToolNames = [
@@ -735,6 +1112,21 @@ class MCPGatewayServer {
       'validate_request_body'
     ];
     return validationToolNames.includes(toolName);
+  }
+
+  // PHASE 4.9: Check if tool is a dynamic composition tool
+  isPhase49Tool(toolName) {
+    const phase49ToolNames = [
+      'compose_intelligent_workflow',
+      'execute_dynamic_workflow',
+      'get_intelligent_workflow_recommendations',
+      'discover_workflow_innovations',
+      'get_workflow_library',
+      'analyze_workflow_patterns',
+      'save_workflow_innovation',
+      'get_fusion_insights'
+    ];
+    return phase49ToolNames.includes(toolName);
   }
 
   // PHASE 3: Handle workflow tool calls
@@ -1015,6 +1407,11 @@ class MCPGatewayServer {
       // PHASE 4.7: Check if this is a validation tool
       if (this.isValidationTool(toolName)) {
         return await this.handleValidationToolCall(toolName, arguments_);
+      }
+
+      // PHASE 4.9: Check if this is a dynamic composition tool
+      if (this.isPhase49Tool(toolName)) {
+        return await this.handlePhase49ToolCall(toolName, arguments_);
       }
 
       // PHASE 4.2: Check if this is the Maybank interactive tool
@@ -1367,6 +1764,276 @@ class MCPGatewayServer {
         ],
         isError: true
       };
+    }
+  }
+
+  // PHASE 4.9: Handle dynamic composition tool calls
+  async handlePhase49ToolCall(toolName, arguments_) {
+    const startTime = Date.now();
+    
+    try {
+      let result;
+      
+      switch (toolName) {
+        case 'compose_intelligent_workflow':
+          result = await this.compositionCoordinator.composeWorkflow(
+            arguments_.userRequest,
+            arguments_.context || {},
+            { innovationLevel: arguments_.innovationLevel || 'enhanced' }
+          );
+          break;
+          
+        case 'execute_dynamic_workflow':
+          result = await this.dynamicExecutor.executeWorkflow(
+            arguments_.workflowPlan,
+            arguments_.parameters || {},
+            { enableLearning: arguments_.enableLearning !== false }
+          );
+          
+          // Learn from execution if enabled
+          if (arguments_.enableLearning !== false && result.success) {
+            await this.adaptiveLearner.learnFromExecution(arguments_.workflowPlan, result);
+          }
+          break;
+          
+        case 'get_intelligent_workflow_recommendations':
+          const recommendations = await this.innovationEngine.recommendInnovations(
+            { userRequest: arguments_.userIntent, context: arguments_.context || {} },
+            { includeInnovative: arguments_.includeInnovative !== false }
+          );
+          result = {
+            success: true,
+            recommendations,
+            userIntent: arguments_.userIntent
+          };
+          break;
+          
+        case 'discover_workflow_innovations':
+          const innovation = await this.innovationEngine.discoverInnovativeWorkflow(
+            arguments_.problemDescription,
+            { 
+              creativityLevel: arguments_.creativityLevel || 0.7,
+              domainHints: arguments_.domainHints || []
+            }
+          );
+          result = {
+            success: true,
+            innovation,
+            problemDescription: arguments_.problemDescription
+          };
+          break;
+          
+        case 'get_workflow_library':
+          const library = await this.persistenceManager.getWorkflowLibrary({
+            filterBy: arguments_.filterBy,
+            sortBy: arguments_.sortBy || 'innovation',
+            limit: arguments_.limit || 10
+          });
+          result = {
+            success: true,
+            library
+          };
+          break;
+          
+        case 'analyze_workflow_patterns':
+          const patterns = await this.usageAnalytics.analyzePopularity({
+            timeframe: arguments_.timeframe || '30d',
+            includeRecommendations: arguments_.includeRecommendations !== false
+          });
+          result = {
+            success: true,
+            patterns,
+            timeframe: arguments_.timeframe || '30d'
+          };
+          break;
+          
+        case 'save_workflow_innovation':
+          const saveResult = await this.persistenceManager.saveInnovativeWorkflow({
+            ...arguments_.workflow,
+            metadata: arguments_.metadata || {}
+          });
+          result = {
+            success: saveResult.success,
+            workflowId: saveResult.workflowId,
+            version: saveResult.version
+          };
+          break;
+          
+        case 'get_fusion_insights':
+          const fusedResponse = await this.contextFusion.fuseResponses(
+            arguments_.apiResponses,
+            { fusionType: arguments_.fusionType || 'contextual' }
+          );
+          
+          const formattedInsights = await this.adaptiveFormatter.formatResponse(
+            fusedResponse,
+            { format: arguments_.outputFormat || 'text' }
+          );
+          
+          result = {
+            success: true,
+            insights: formattedInsights,
+            fusionType: arguments_.fusionType || 'contextual',
+            outputFormat: arguments_.outputFormat || 'text'
+          };
+          break;
+          
+        default:
+          throw new Error(`Unknown Phase 4.9 tool: ${toolName}`);
+      }
+      
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, result.success !== false, duration);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: this.formatPhase49Response(result, toolName)
+          }
+        ]
+      };
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, false, duration);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `❌ Phase 4.9 Tool Error: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+
+  // PHASE 4.9: Format Phase 4.9 tool responses
+  formatPhase49Response(result, toolName) {
+    try {
+      switch (toolName) {
+        case 'compose_intelligent_workflow':
+          if (!result.success) {
+            return `❌ **Workflow Composition Failed**\n\n${result.error}`;
+          }
+          
+          const workflow = result.workflowPlan || result.workflow;
+          return `🧠 **Intelligent Workflow Composed**\n\n` +
+                 `**Workflow Name:** ${workflow.name || 'Untitled Workflow'}\n` +
+                 `**Type:** ${workflow.type || 'dynamic'}\n` +
+                 `**Steps:** ${workflow.steps?.length || 0}\n` +
+                 `**Innovation Level:** ${result.innovationLevel || 'enhanced'}\n` +
+                 `**Confidence:** ${Math.round((result.confidence || 0.8) * 100)}%\n\n` +
+                 `**Description:** ${workflow.description || workflow.intent || 'AI-composed workflow'}\n\n` +
+                 `**Workflow Steps:**\n${workflow.steps?.map((step, i) => 
+                   `${i + 1}. ${step.operation || step.name || 'Unknown step'}`
+                 ).join('\n') || 'No steps defined'}`;
+          
+        case 'execute_dynamic_workflow':
+          if (!result.success) {
+            return `❌ **Dynamic Workflow Execution Failed**\n\n${result.error}`;
+          }
+          
+          return `🚀 **Dynamic Workflow Executed Successfully**\n\n` +
+                 `**Execution ID:** ${result.executionId || 'N/A'}\n` +
+                 `**Duration:** ${result.duration || 0}ms\n` +
+                 `**Steps Completed:** ${result.completedSteps || 0}/${result.totalSteps || 0}\n` +
+                 `**Data Flow Status:** ${result.dataFlowStatus || 'completed'}\n` +
+                 `**Learning Enabled:** ${result.learningEnabled ? 'Yes' : 'No'}\n\n` +
+                 `**Results Summary:**\n${JSON.stringify(result.summary || result.data, null, 2)}`;
+          
+        case 'get_intelligent_workflow_recommendations':
+          if (result.recommendations.length === 0) {
+            return `💡 **No Workflow Recommendations**\n\nNo intelligent recommendations found for: "${result.userIntent}"`;
+          }
+          
+          return `💡 **Intelligent Workflow Recommendations** (${result.recommendations.length})\n\n` +
+                 `**For Intent:** "${result.userIntent}"\n\n` +
+                 result.recommendations.slice(0, 8).map((rec, i) => 
+                   `**${i + 1}. ${rec.title || rec.type}**\n` +
+                   `   Priority: ${rec.priority || 'medium'}\n` +
+                   `   Description: ${rec.description}\n` +
+                   `   Innovation Level: ${rec.innovationLevel || 'standard'}\n`
+                 ).join('\n') +
+                 (result.recommendations.length > 8 ? `\n...and ${result.recommendations.length - 8} more recommendations` : '');
+          
+        case 'discover_workflow_innovations':
+          const innovation = result.innovation;
+          if (!innovation || !innovation.workflow) {
+            return `🔬 **No Innovations Discovered**\n\nNo innovative workflows found for: "${result.problemDescription}"`;
+          }
+          
+          return `🔬 **Workflow Innovation Discovered**\n\n` +
+                 `**Problem:** "${result.problemDescription}"\n\n` +
+                 `**Innovation Metrics:**\n` +
+                 `• Novelty: ${Math.round((innovation.innovation?.novelty || 0) * 100)}%\n` +
+                 `• Value: ${Math.round((innovation.innovation?.value || 0) * 100)}%\n` +
+                 `• Feasibility: ${Math.round((innovation.innovation?.feasibility || 0) * 100)}%\n` +
+                 `• Overall Score: ${Math.round((innovation.innovation?.overall || 0) * 100)}%\n\n` +
+                 `**Innovative Workflow:**\n` +
+                 `Name: ${innovation.workflow.name || 'Innovative Solution'}\n` +
+                 `Type: ${innovation.workflow.innovationType || 'novel'}\n` +
+                 `Steps: ${innovation.workflow.steps?.length || 0}`;
+          
+        case 'get_workflow_library':
+          const library = result.library;
+          if (!library.workflows || library.workflows.length === 0) {
+            return `📚 **Workflow Library Empty**\n\nNo workflows found matching your criteria.`;
+          }
+          
+          return `📚 **Workflow Library** (${library.workflows.length}/${library.metadata.totalAvailable})\n\n` +
+                 `**Total Innovations:** ${library.metadata.totalInnovations || 0}\n` +
+                 `**Categories:** ${Object.keys(library.metadata.categories || {}).length}\n\n` +
+                 `**Workflows:**\n` +
+                 library.workflows.slice(0, 10).map((w, i) => 
+                   `${i + 1}. **${w.name || 'Untitled'}**\n` +
+                   `   Type: ${w.innovationType || 'standard'}\n` +
+                   `   Innovation: ${Math.round((w.innovation?.overall || 0) * 100)}%\n` +
+                   `   Steps: ${w.steps?.length || 0}\n`
+                 ).join('\n') +
+                 (library.workflows.length > 10 ? `\n...and ${library.workflows.length - 10} more workflows` : '');
+          
+        case 'analyze_workflow_patterns':
+          const patterns = result.patterns;
+          return `📊 **Workflow Pattern Analysis** (${result.timeframe})\n\n` +
+                 `**Top Patterns:**\n${patterns.rankings?.slice(0, 5).map((pattern, i) => 
+                   `${i + 1}. ${pattern.pattern || pattern.id}: ${pattern.usage || 0} uses`
+                 ).join('\n') || 'No patterns found'}\n\n` +
+                 `**Analysis Summary:**\n` +
+                 `• Total Workflows: ${patterns.totalWorkflows || 0}\n` +
+                 `• Success Rate: ${Math.round((patterns.averageSuccessRate || 0) * 100)}%\n` +
+                 `• Avg Execution Time: ${patterns.averageExecutionTime || 0}ms`;
+          
+        case 'save_workflow_innovation':
+          if (!result.success) {
+            return `❌ **Failed to Save Innovation**\n\n${result.error}`;
+          }
+          
+          return `💾 **Innovation Saved Successfully**\n\n` +
+                 `**Workflow ID:** ${result.workflowId}\n` +
+                 `**Version:** ${result.version}\n` +
+                 `**Status:** Saved to persistent library\n\n` +
+                 `The innovative workflow is now available for future reuse and learning.`;
+          
+        case 'get_fusion_insights':
+          if (!result.success) {
+            return `❌ **Fusion Failed**\n\n${result.error}`;
+          }
+          
+          return `🧩 **Data Fusion Insights**\n\n` +
+                 `**Fusion Type:** ${result.fusionType}\n` +
+                 `**Output Format:** ${result.outputFormat}\n` +
+                 `**Sources:** ${result.sourceCount || 'Multiple'} API responses\n\n` +
+                 `**Fused Insights:**\n${result.insights}`;
+          
+        default:
+          return `Phase 4.9 tool '${toolName}' completed successfully\n\n${JSON.stringify(result, null, 2)}`;
+      }
+      
+    } catch (error) {
+      return `Error formatting Phase 4.9 response: ${error.message}\n\nRaw result:\n${JSON.stringify(result, null, 2)}`;
     }
   }
 
