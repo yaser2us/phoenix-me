@@ -3,6 +3,7 @@ import { RequestBuilder } from './request-builder.js';
 import { MaybankAdapter } from '../adapters/maybank-adapter.js';
 import { JWTManager } from '../authentication/jwt-manager.js';
 import { logger } from '../utils/logger.js';
+import { debugLogger } from '../utils/debug-logger.js';
 
 export class ApiExecutor {
   constructor(registry, authConfig) {
@@ -26,10 +27,35 @@ export class ApiExecutor {
     try {
       logger.debug('Executing operation', { operationId, userParameters });
       
+      // Debug logging for payment operations
+      const isPaymentOp = operationId === 'get_payment_favList_1';
+      if (isPaymentOp) {
+        debugLogger.log('EXECUTOR_START', {
+          operationId,
+          userParameters: debugLogger.sanitizeData(userParameters),
+          options,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       // Get operation details from registry
       const operationDetails = this.registry.getOperationDetails(operationId);
       if (!operationDetails) {
         throw new Error(`Operation '${operationId}' not found in registry`);
+      }
+      
+      if (isPaymentOp) {
+        debugLogger.log('OPERATION_DETAILS', {
+          found: true,
+          path: operationDetails.path,
+          method: operationDetails.method,
+          servers: operationDetails.servers,
+          parameters: operationDetails.parameters?.map(p => ({
+            name: p.name,
+            in: p.in,
+            required: p.required
+          }))
+        });
       }
       
       // Check if this is a Maybank operation
@@ -103,6 +129,16 @@ export class ApiExecutor {
         hasBody: !!requestConfig.data
       });
       
+      // Debug logging for payment operations
+      if (requestConfig.url?.includes('favList')) {
+        debugLogger.logApiCall(
+          requestConfig.method?.toUpperCase() || 'GET',
+          requestConfig.url,
+          requestConfig.headers || {},
+          requestConfig.data
+        );
+      }
+      
       // Log full request details in debug mode
       if (process.env.LOG_LEVEL === 'debug' && process.env.FULL_DEBUG === 'true') {
         logger.debug('Full request details (DEBUG MODE)', {
@@ -123,6 +159,16 @@ export class ApiExecutor {
         contentLength: response.headers?.['content-length'],
         hasData: !!response.data
       });
+      
+      // Debug logging for payment operations
+      if (requestConfig.url?.includes('favList')) {
+        debugLogger.logApiResponse(
+          response.status,
+          response.statusText,
+          response.headers,
+          response.data
+        );
+      }
       
       // Log response data for debugging (be careful with sensitive data)
       if (response.data) {
@@ -329,8 +375,43 @@ export class ApiExecutor {
   // Prepare Maybank-specific request
   async prepareMaybankRequest(operationId, userParameters, options) {
     try {
-      // JWT token is now optional - adapter will use default if not provided
-      const jwtToken = options.jwtToken;
+      // Extract JWT token from user parameters (headers) or options
+      let jwtToken = options.jwtToken;
+      
+      // If no JWT token in options, try to extract from authorization headers
+      if (!jwtToken && userParameters) {
+        // Check various authorization header formats
+        const authHeader = userParameters['authorization'] || 
+                          userParameters['Authorization'] || 
+                          userParameters['maya-authorization'];
+        
+        if (operationId === 'get_payment_favList_1') {
+          debugLogger.log('JWT_EXTRACTION', {
+            hasOptionsToken: !!options.jwtToken,
+            hasAuthHeader: !!authHeader,
+            authHeaderKey: authHeader ? Object.keys(userParameters).find(k => k.toLowerCase().includes('authorization')) : null,
+            authHeaderValue: authHeader ? debugLogger.sanitizeData({ token: authHeader }) : null
+          });
+        }
+        
+        if (authHeader) {
+          // Extract token from "Bearer <token>" format
+          jwtToken = authHeader.replace(/^bearer\s+/i, '').replace(/^Bearer\s+/i, '');
+          logger.debug('Extracted JWT token from authorization header', { 
+            hasToken: !!jwtToken, 
+            tokenLength: jwtToken?.length 
+          });
+          
+          if (operationId === 'get_payment_favList_1') {
+            debugLogger.log('JWT_EXTRACTED', {
+              tokenLength: jwtToken?.length,
+              tokenPrefix: jwtToken?.substring(0, 20),
+              tokenSuffix: jwtToken?.substring(jwtToken.length - 20)
+            });
+            debugLogger.logJWTAnalysis(jwtToken);
+          }
+        }
+      }
       
       if (!jwtToken) {
         logger.info('No JWT token provided, using default token');

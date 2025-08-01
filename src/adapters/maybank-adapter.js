@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger.js';
 import crypto from 'crypto';
+import { debugLogger } from '../utils/debug-logger.js';
 
 /**
  * Maybank API Adapter - Phase 4.2 Checkpoint 1
@@ -22,7 +23,8 @@ export class MaybankAdapter {
     
     // Hardcoded JWT token for testing (temporary)
     // TODO: Remove this hardcoded token in production
-    this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDcyOTE1LjAwNTk3NTU5MTdAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJlRk9YT1ZmUTlaRjA3TVozSXNHaGU5UDVaY0JYUUN5R1dEd1lWUlp2aDh1Q3NhYmFXeVRsbkdCbjdwZHFrcjZ3a2xORGZTbjhrZDYwRlZKYmVzT1hnSm5GcGFLYWpuU1JxemNzb2RscmdVNktZM2h4ZnFwS05IWVFHcnlqY0FaVXR3TktMVlgyL0kwQVpUUnQrVFB1cDI3Y0ErWGswNFAwQnp5WVdSL3Z6bFU9IiwiZXhwIjoxNzg1MzQ1NTYxLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImZiMmJlOTNjLTNkZDAtNGJlNi1hOTI0LTJkNWUzYjIwNjBkOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hMEH-zzCSV7tHYphdwEezQbSL6kbZCODVuydbKredqA';
+    this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfQkFOS0lORyIsIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDgwMTA3LjEyODA3NTU3OTVAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJuTkxBSVNUQllSM1J4Uy81aHBxQnlJN1BlMTU1ck1YeE1EUkJpcUxxNUtDVHhaa2NTblRMT2Y0UW1TODgzbUdqNE9jWnhveStqYTlXQlA1WkQrOUxMRzdNNWhRZTdTYWgzbzNiQmRjMXV2QWtUd09vNnFZYW96TlpJb0ZURWovT2s2dVp0VVZtekRXZjlnbFdEZ0JNdWd2WncvcDUyOG1IZXlmSWRmY1JwUlE9IiwiZXhwIjoxNzg1NTc3MDE1LCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImNjYTkyZDViLTk0MjctNDY1MS1hMGU0LTdkNDE2Y2Y2MGY2NSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.vc5iWlr0qsXtvwGospoXjJDJAjgh8oKdvontdIdHF28'
+    // this.DEFAULT_JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDcyOTE1LjAwNTk3NTU5MTdAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJlRk9YT1ZmUTlaRjA3TVozSXNHaGU5UDVaY0JYUUN5R1dEd1lWUlp2aDh1Q3NhYmFXeVRsbkdCbjdwZHFrcjZ3a2xORGZTbjhrZDYwRlZKYmVzT1hnSm5GcGFLYWpuU1JxemNzb2RscmdVNktZM2h4ZnFwS05IWVFHcnlqY0FaVXR3TktMVlgyL0kwQVpUUnQrVFB1cDI3Y0ErWGswNFAwQnp5WVdSL3Z6bFU9IiwiZXhwIjoxNzg1MzQ1NTYxLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImZiMmJlOTNjLTNkZDAtNGJlNi1hOTI0LTJkNWUzYjIwNjBkOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hMEH-zzCSV7tHYphdwEezQbSL6kbZCODVuydbKredqA';
     
     logger.info('Maybank adapter initialized', { config: this.config });
   }
@@ -47,7 +49,7 @@ export class MaybankAdapter {
       });
 
       // Build request headers with all required Maybank headers
-      const headers = await this.buildMaybankHeaders(tokenToUse);
+      const headers = await this.buildMaybankHeaders(tokenToUse, operation);
       
       // Build the complete URL
       const url = await this.buildURL(operation, parameters);
@@ -81,28 +83,47 @@ export class MaybankAdapter {
   /**
    * Build Maybank-specific headers
    */
-  async buildMaybankHeaders(jwtToken) {
-    const sessionTraceId = await this.generateSessionTraceId();
+  async buildMaybankHeaders(jwtToken, operationId = null) {
+    // Use provided token first, fallback to default only if no token provided
+    const token = jwtToken || this.DEFAULT_JWT_TOKEN;
     
+    // Debug logging for payment operations
+    if (operationId === 'get_payment_favList_1') {
+      debugLogger.log('MAYBANK_HEADER_BUILD', {
+        providedToken: !!jwtToken,
+        usingDefaultToken: !jwtToken,
+        tokenUsed: debugLogger.sanitizeData({ token }),
+        tokenLength: token?.length,
+        operationId
+      });
+    }
+    
+    // Use the working session trace ID from your curl command
+    const sessionTraceId = 'T0h2a0s5WXA3eG5xZHBkanUyR3JqNEdzS0xBemhZeWc=';
+
     const headers = {
       'Accept': 'application/json',
-      'authorization': `bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDczMDIxLjkyOTk0ODQ5ODZAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJTbXRhSlZnUFdWT05FaWFDYnZTWUZLckZydU40b0Y4Yk1OT09ucUNtUVBCTlN0SExyNVY0aEczR3hSdjVReTYzak1qWUJJL1lJYnNSTVFPelRQb1BhbTc3WlJxclpXZFREU3ZmZ3VjZkdOSGtmb3Z2ZEk4OGwvb1VvTDlDQVE5YW5LNGtGcEVXbDBVRXJ1eFMybEFNb0FnQTJsQnlnUXh5Yzd5S1VGNURJb009IiwiZXhwIjoxNzg1NDUzNDEzLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImM1NGFmMWVlLTRhMWItNGFmYi04OWRjLTk5NjhiMmI5ZWViOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.NjE7JMQNBERQf8pUtkvvvMQEG8FBYNLaS0oOHgvnfp8`, // Standard Authorization header for compatibility
-      'maya-authorization': `bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXNfa2V5IjoiVTJGc2RHVmtYMThoTlRIT1g3cmIwSDJKQUY0YmNIckp5d0dNSG5CZHZDU0F6cFhIanY0RHVHQmQyWUtuUk5LaEZRZWVCc1BLMWt2aGVOdkk2RDcrUGc9PSIsImF1ZCI6WyJ6dXVsR2F0ZXdheSJdLCJ1c2VyX25hbWUiOiJZYXNlcjJ1cyIsImN1c1R5cGUiOiIxMCIsInNjb3BlIjpbIkVESVRfTk9OX0JBTktJTkciLCJSRUFEX0JBTktJTkciLCJSRUFEX05PTl9CQU5LSU5HIl0sIm1heWFfc2Vzc2lvbl9pZCI6IkBAQEAyMDI1MDcyOTE1LjAwNTk3NTU5MTdAQEBAIiwibTJ1X3VzZXJfaWQiOjE3ODI3NzEzLCJwYW4iOiJlRk9YT1ZmUTlaRjA3TVozSXNHaGU5UDVaY0JYUUN5R1dEd1lWUlp2aDh1Q3NhYmFXeVRsbkdCbjdwZHFrcjZ3a2xORGZTbjhrZDYwRlZKYmVzT1hnSm5GcGFLYWpuU1JxemNzb2RscmdVNktZM2h4ZnFwS05IWVFHcnlqY0FaVXR3TktMVlgyL0kwQVpUUnQrVFB1cDI3Y0ErWGswNFAwQnp5WVdSL3Z6bFU9IiwiZXhwIjoxNzg1MzQ1NTYxLCJ1c2VySWQiOjUxMjYxMDksImp0aSI6ImZiMmJlOTNjLTNkZDAtNGJlNi1hOTI0LTJkNWUzYjIwNjBkOSIsImNsaWVudF9pZCI6Ik0yVUdBVEVXQVkifQ.hMEH-zzCSV7tHYphdwEezQbSL6kbZCODVuydbKredqA`, // ${jwtToken}Additional maya-authorization header required by Maybank API
       'X-APP-PLATFORM': this.config.platform,
       'X-APP-VERSION': this.config.appVersion,
-      'X-APP-ENVIRONMENT': this.config.environment, // empty value like in cURL
+      'X-APP-ENVIRONMENT': '', // Note: empty value with semicolon in your curl
       'X-APP-BUILD-NO': this.config.buildNo,
       'X-APP-RELEASE-NO': this.config.releaseNo,
       'X-APP-SESSION-TRACE-ID': sessionTraceId,
-      // Remove Content-Type for GET requests to exactly match cURL
-      // Remove User-Agent to exactly match cURL
+      'x-mb-client-adapter': 'mae-favorites-bill-payment-inquiry',
+      'X-MB-E2E-Id': sessionTraceId,
+      'X-MB-Timestamp': Date.now().toString(),
+      'X-MB-ENV': 'S',
+      'X-MB-Client-Id': 'mae-fe-iv5p7',
+      'authorization': `bearer ${token}`, // lowercase to match working curl
+      'maya-authorization': `bearer ${token}`,
     };
 
     logger.debug('Built Maybank headers', {
       headerKeys: Object.keys(headers),
       hasAuth: headers.Authorization && headers.Authorization.startsWith('Bearer '),
       hasMayaAuth: headers['maya-authorization'] && headers['maya-authorization'].startsWith('bearer '),
-      sessionTraceLength: sessionTraceId.length
+      sessionTraceLength: sessionTraceId.length,
+      operationId: operationId
     });
 
     return headers;
@@ -125,6 +146,9 @@ export class MaybankAdapter {
           break;
         case 'get_banking_all':
           path = '/banking/v1/accounts/all';
+          break;
+        case 'get_payment_favList_1':
+          path = '/payment/v1/pay/bill/favList';
           break;
         default:
           throw new Error(`Unknown Maybank operation: ${operationId}`);

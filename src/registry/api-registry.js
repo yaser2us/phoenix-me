@@ -186,6 +186,45 @@ export class ApiRegistry {
     }));
   }
 
+  /**
+   * Get components (schemas, etc.) from all registered OpenAPI specs
+   * Used for schema resolution and validation
+   */
+  getComponents() {
+    if (!this.initialized) {
+      throw new Error('ApiRegistry not initialized');
+    }
+
+    const allComponents = {
+      schemas: {},
+      responses: {},
+      parameters: {},
+      examples: {},
+      requestBodies: {},
+      headers: {},
+      securitySchemes: {},
+      links: {},
+      callbacks: {}
+    };
+
+    // Merge components from all specs
+    for (const [specName, spec] of this.specs) {
+      if (spec.components) {
+        // Merge each component type
+        for (const [componentType, components] of Object.entries(spec.components)) {
+          if (allComponents[componentType]) {
+            allComponents[componentType] = {
+              ...allComponents[componentType],
+              ...components
+            };
+          }
+        }
+      }
+    }
+
+    return allComponents;
+  }
+
   validateSpec(openApiSpec) {
     // Check required OpenAPI fields
     if (!openApiSpec.openapi) {
@@ -290,7 +329,7 @@ export class ApiRegistry {
    * Get all operations grouped by API
    * @returns {Object} Operations grouped by API ID
    */
-  getAllOperations() {
+  getAllOperationsGrouped() {
     const grouped = {};
     
     for (const [operationId, details] of this.operations) {

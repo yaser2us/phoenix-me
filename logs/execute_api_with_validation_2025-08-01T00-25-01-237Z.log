@@ -1,0 +1,31 @@
+
+==========================================================================
+API FLOW DEBUG LOG
+==========================================================================
+Session ID: execute_api_with_validation_2025-08-01T00-25-01-237Z
+Operation: execute_api_with_validation
+Started At: 2025-08-01T00:25:01.237Z
+==========================================================================
+
+
+[2025-08-01T00:25:01.237Z] ✅ ENTRY_POINT
+======================================================================
+{
+  "toolName": "execute_api_with_validation",
+  "arguments": {
+    "operationId": "get_payment_favList_1",
+    "parameters": {
+      "Accept": "application/json",
+      "X-APP-PLATFORM": "IOS",
+      "X-APP-VERSION": "0.9.38",
+      "X-APP-ENVIRONMENT": "",
+      "X-APP-BUILD-NO": "1203",
+      "X-APP-RELEASE-NO": "25.5.0",
+      "maya-authorization": "bearer eyJhbGciOiJIU...-dGk1-vonEQ0DZ0gL5jA",
+      "authorization": "bearer eyJhbGciOiJIU...-dGk1-vonEQ0DZ0gL5jA"
+    },
+    "enableInteractiveCollection": false
+  },
+  "timestamp": "2025-08-01T00:25:01.237Z"
+}
+
