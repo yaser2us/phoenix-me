@@ -54,13 +54,36 @@ export class MaybankAdapter {
       // Build the complete URL
       const url = await this.buildURL(operation, parameters);
       
+      // Determine method and body based on operation
+      let method = 'GET';
+      let body = null;
+      
+      if (operation === 'post_bill_getBillsTxnHistory') {
+        method = 'POST';
+        // Extract request body from parameters
+        body = {
+          payeeCode: parameters.payeeCode || "1111",
+          billAcctNo: parameters.billAcctNo || "210027549604", 
+          favBillPaymentStep2: parameters.favBillPaymentStep2 || "17",
+          gstNotesFavPaymentStep2: parameters.gstNotesFavPaymentStep2 || "gstnotesfavpaystep2",
+          fullName: parameters.fullName || "Tenaga Nasional Berhad",
+          shortName: parameters.shortName || "Tenaga Nasional Berhad"
+        };
+        // Add Content-Type for POST requests
+        headers['Content-Type'] = 'application/json';
+      }
+      
       const preparedRequest = {
         url,
-        method: 'GET',
+        method,
         headers,
         timeout: 30000, // 30 seconds for banking operations
         validateStatus: (status) => status < 500 // Accept 4xx as valid responses to handle properly
       };
+      
+      if (body) {
+        preparedRequest.data = body;
+      }
 
       logger.debug('Maybank request prepared', {
         operation,
@@ -149,6 +172,9 @@ export class MaybankAdapter {
           break;
         case 'get_payment_favList_1':
           path = '/payment/v1/pay/bill/favList';
+          break;
+        case 'post_bill_getBillsTxnHistory':
+          path = '/bill/v2/bills/getBillsTxnHistory';
           break;
         default:
           throw new Error(`Unknown Maybank operation: ${operationId}`);
@@ -243,7 +269,10 @@ export class MaybankAdapter {
       }
 
       // Check for Maybank standard response format
-      if (responseData.message !== 'success' || responseData.code !== 0) {
+      const isPaymentApi = responseData.message !== undefined && responseData.code !== undefined;
+      const isBillApi = responseData.statusCode !== undefined && responseData.statusDesc !== undefined;
+      
+      if (isPaymentApi && (responseData.message !== 'success' || responseData.code !== 0)) {
         // Log the actual response for debugging
         logger.error('Maybank API returned error response', {
           message: responseData.message,
@@ -254,6 +283,20 @@ export class MaybankAdapter {
         return {
           isValid: false,
           error: `Maybank API error: ${responseData.message || 'Unknown error'} (code: ${responseData.code || 'Unknown'})`
+        };
+      }
+      
+      if (isBillApi && (responseData.statusCode !== "0000" || responseData.statusDesc !== "Successful")) {
+        // Log the actual response for debugging
+        logger.error('Maybank Bill API returned error response', {
+          statusCode: responseData.statusCode,
+          statusDesc: responseData.statusDesc,
+          fullResponse: responseData
+        });
+        
+        return {
+          isValid: false,
+          error: `Maybank Bill API error: ${responseData.statusDesc || 'Unknown error'} (code: ${responseData.statusCode || 'Unknown'})`
         };
       }
 
@@ -289,6 +332,20 @@ export class MaybankAdapter {
             extractedData = {
               accounts: responseData,
               accountCount: responseData.length
+            };
+          }
+          break;
+          
+        case 'post_bill_getBillsTxnHistory':
+          if (responseData.statusCode === "0000") {
+            extractedData = {
+              statusCode: responseData.statusCode,
+              statusDesc: responseData.statusDesc,
+              effectiveDateList: responseData.populateEffectiveDateList || [],
+              ebpp: responseData.ebpp,
+              companyHeader: responseData.ebppData?.companyHeader,
+              lastThreePayment: responseData.lastThreePayment || [],
+              gstComplianceNotes: responseData.gstComplianceNotes
             };
           }
           break;
