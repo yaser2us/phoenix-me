@@ -29,13 +29,20 @@ export class DynamicWorkflowExecutor {
     });
     
     try {
+      // Ensure all steps have IDs
+      const stepsWithIds = workflowPlan.steps.map((step, index) => ({
+        ...step,
+        id: step.id || `step_${index + 1}`,
+        dependencies: step.dependencies || []
+      }));
+      
       // Plan execution strategy
-      const executionPlan = await this.orchestrator.planExecution(workflowPlan.steps);
+      const executionPlan = await this.orchestrator.planExecution(stepsWithIds);
       
       // Initialize execution context
       const executionContext = {
         id: executionId,
-        plan: workflowPlan,
+        plan: { ...workflowPlan, steps: stepsWithIds },
         executionPlan,
         stepResults: new Map(),
         startTime,
@@ -73,7 +80,7 @@ export class DynamicWorkflowExecutor {
         success: false,
         executionId,
         error: error.message,
-        stepResults: new Map(),
+        stepResults: {},
         metrics: {
           totalTime: Date.now() - startTime,
           stepsExecuted: 0,
@@ -302,7 +309,13 @@ export class DynamicWorkflowExecutor {
    * Prepare step parameters including data flow inputs
    */
   async prepareStepParameters(step, executionContext) {
-    let parameters = { ...step.parameters };
+    // Handle both 'parameters' and 'params' properties for flexibility
+    let parameters = { ...step.parameters, ...step.params };
+    
+    // Merge with execution context parameters if available
+    if (executionContext.options.parameters) {
+      parameters = { ...parameters, ...executionContext.options.parameters };
+    }
     
     // Add data flow inputs if this step has incoming data flows
     if (executionContext.plan.dataFlowMap && executionContext.plan.dataFlowMap.has(step.id)) {
@@ -485,7 +498,7 @@ export class DynamicWorkflowExecutor {
     return {
       success: failedSteps === 0,
       executionId: executionContext.id,
-      stepResults: executionContext.stepResults,
+      stepResults: Object.fromEntries(executionContext.stepResults),
       metrics: {
         totalTime,
         stepsExecuted: totalSteps,

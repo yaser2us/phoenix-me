@@ -1,0 +1,34 @@
+{
+  "id": "wf_1754300690281_0su9rb",
+  "name": "Check London Weather",
+  "description": "Simple workflow to check weather in London",
+  "steps": [
+    {
+      "operation": "getCurrentWeather",
+      "parameters": {
+        "q": "London"
+      },
+      "order": 1
+    }
+  ],
+  "tags": [
+    "weather",
+    "simple",
+    "london"
+  ],
+  "userSaved": true,
+  "savedAt": "2025-08-04T09:44:50.282Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [
+      "weather"
+    ],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "1f2cc42d",
+      "metadata": "19874782f6a"
+    }
+  },
+  "persistedAt": "2025-08-04T09:44:50.282Z",
+  "version": "1.0"
+}

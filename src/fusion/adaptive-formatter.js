@@ -14,6 +14,127 @@ export class AdaptiveFormatter {
   }
 
   /**
+   * Format response adaptively based on desired format
+   */
+  async formatResponse(data, options = {}) {
+    try {
+      const format = options.format || 'text';
+      
+      logger.debug('Formatting response', {
+        format,
+        dataType: typeof data,
+        hasData: !!data
+      });
+
+      switch (format) {
+        case 'text':
+          return await this.formatAsText(data, options);
+        case 'json':
+          return await this.formatAsJSON(data, options);
+        case 'cards':
+          return await this.formatAsCards(data, options);
+        case 'chart':
+          return await this.formatAsChart(data, options);
+        case 'executive':
+          return await this.formatExecutiveSummary(data, options);
+        default:
+          return await this.formatAsText(data, options);
+      }
+    } catch (error) {
+      logger.error('Response formatting failed', { error: error.message });
+      return this.formatError(error, options);
+    }
+  }
+
+  /**
+   * Format data as readable text
+   */
+  async formatAsText(data, options = {}) {
+    if (typeof data === 'string') {
+      return data;
+    }
+
+    if (typeof data === 'object') {
+      if (data.fusionInsights && Array.isArray(data.fusionInsights)) {
+        const insights = data.fusionInsights.map(insight => 
+          `• ${insight.insight} (${Math.round((insight.confidence || 0.7) * 100)}% confidence)`
+        ).join('\n');
+        
+        return `Fused Data Insights:\n${insights}\n\nProcessed ${data.responseCount || 0} API responses with ${data.fusionType || 'contextual'} fusion.`;
+      }
+      
+      return JSON.stringify(data, null, 2);
+    }
+
+    return String(data);
+  }
+
+  /**
+   * Format data as JSON
+   */
+  async formatAsJSON(data, options = {}) {
+    return JSON.stringify(data, null, options.pretty ? 2 : 0);
+  }
+
+  /**
+   * Format data as cards
+   */
+  async formatAsCards(data, options = {}) {
+    const cards = [];
+    
+    if (data.fusionInsights && Array.isArray(data.fusionInsights)) {
+      data.fusionInsights.forEach((insight, index) => {
+        cards.push({
+          id: `insight_${index}`,
+          title: insight.category || 'Insight',
+          content: insight.insight,
+          confidence: insight.confidence || 0.7,
+          type: insight.type || 'general'
+        });
+      });
+    } else {
+      cards.push({
+        id: 'data_card',
+        title: 'Data Summary',
+        content: await this.formatAsText(data, options),
+        confidence: 0.8,
+        type: 'summary'
+      });
+    }
+    
+    return {
+      format: 'cards',
+      cards,
+      metadata: {
+        cardCount: cards.length,
+        generatedAt: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Format data as chart description
+   */
+  async formatAsChart(data, options = {}) {
+    return {
+      format: 'chart',
+      description: 'Chart visualization would show data relationships and trends',
+      data: data,
+      chartType: options.chartType || 'line',
+      metadata: {
+        generatedAt: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Format error message
+   */
+  formatError(error, options = {}) {
+    return `Error formatting response: ${error.message}`;
+  }
+
+  /**
    * Format data as executive summary
    */
   async formatExecutiveSummary(data, options = {}) {

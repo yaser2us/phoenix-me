@@ -17,7 +17,7 @@ import { IntentParser } from './parsers/intent-parser.js';
 import { WorkflowEngine } from './workflows/workflow-engine.js';
 import { initializeConfig, config } from './config/server-config.js';
 import { logger } from './utils/logger.js';
-import { Validators } from './utils/validators.js';
+// import { Validators } from './utils/validators.js';
 import { debugLogger } from './utils/debug-logger.js';
 import { MaybankInteractiveTool } from './interaction/maybank-interactive-tool.js';
 
@@ -428,14 +428,14 @@ class MCPGatewayServer {
         logger.debug('Processing operation', { operation });
         const operationDetails = this.registry.getOperationDetails(operation.operationId);
         logger.debug('Got operation details', { operationId: operation.operationId });
-        const tool = this.createToolFromOperation(operationDetails);
-        logger.debug('Created tool', { toolName: tool.name });
-        tools.push(tool);
+        // const tool = this.createToolFromOperation(operationDetails);
+        // logger.debug('Created tool', { toolName: tool.name });
+        // tools.push(tool);
         
-        logger.debug('Created MCP tool', { 
-          toolName: tool.name, 
-          operationId: operation.operationId 
-        });
+        // logger.debug('Created MCP tool', { 
+        //   toolName: tool.name, 
+        //   operationId: operation.operationId 
+        // });
       }
       
       // PHASE 3: Add workflow tools
@@ -536,13 +536,17 @@ class MCPGatewayServer {
       // Tool 1: Execute predefined workflow
       {
         name: "execute_workflow",
-        description: "Execute a predefined workflow by name with parameters",
+        description: "Execute a predefined workflow by name or saved workflow by ID",
         inputSchema: {
           type: "object",
           properties: {
             workflowName: {
               type: "string",
-              description: "Name of the workflow to execute (e.g., location_weather, trip_planning, market_overview)"
+              description: "Name of predefined workflow to execute (e.g., location_weather, trip_planning, market_overview)"
+            },
+            workflowId: {
+              type: "string",
+              description: "ID of saved workflow to execute (e.g., wf_1754302151056_x15mix)"
             },
             parameters: {
               type: "object",
@@ -550,7 +554,10 @@ class MCPGatewayServer {
               additionalProperties: true
             }
           },
-          required: ["workflowName"]
+          oneOf: [
+            { required: ["workflowName"] },
+            { required: ["workflowId"] }
+          ]
         }
       },
       
@@ -1045,7 +1052,55 @@ class MCPGatewayServer {
         }
       },
 
-      // Tool 8: Get fusion insights
+      // Tool 8: Save any workflow (explicit user control)
+      {
+        name: "save_workflow",
+        description: "Save any workflow to persistent storage for future reuse (no innovation criteria required)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            workflow: {
+              type: "object",
+              description: "The workflow to save (with id, name, description, and steps)",
+              properties: {
+                id: { type: "string", description: "Workflow ID (auto-generated if not provided)" },
+                name: { type: "string", description: "Workflow name" },
+                description: { type: "string", description: "Workflow description" },
+                steps: { type: "array", description: "Workflow steps", items: { type: "object" } }
+              },
+              required: ["steps"]
+            },
+            tags: {
+              type: "array",
+              description: "Tags to categorize the workflow",
+              items: { type: "string" }
+            }
+          },
+          required: ["workflow"]
+        }
+      },
+
+      // Tool 9: Get workflow schema and documentation
+      {
+        name: "get_workflow_schema",
+        description: "Get workflow structure schema, available operations, and examples to understand how to create workflows",
+        inputSchema: {
+          type: "object",
+          properties: {
+            includeExamples: {
+              type: "boolean",
+              description: "Include example workflows",
+              default: true
+            },
+            operationFilter: {
+              type: "string",
+              description: "Filter operations by domain (e.g., 'banking', 'weather', 'currency')"
+            }
+          }
+        }
+      },
+
+      // Tool 10: Get fusion insights
       {
         name: "get_fusion_insights",
         description: "Get intelligent insights by fusing data from multiple API responses",
@@ -1124,9 +1179,105 @@ class MCPGatewayServer {
       'get_workflow_library',
       'analyze_workflow_patterns',
       'save_workflow_innovation',
+      'save_workflow',
+      'get_workflow_schema',
       'get_fusion_insights'
     ];
     return phase49ToolNames.includes(toolName);
+  }
+
+  // Helper method to extract operation domain
+  extractOperationDomain(operationId) {
+    if (operationId.includes('weather') || operationId.includes('Weather')) return 'weather';
+    if (operationId.includes('banking') || operationId.includes('Balance') || operationId.includes('expense')) return 'banking';
+    if (operationId.includes('currency') || operationId.includes('Currency')) return 'currency';
+    if (operationId.includes('payment') || operationId.includes('Payment')) return 'payment';
+    if (operationId.includes('goal') || operationId.includes('Goal')) return 'goals';
+    if (operationId.includes('news') || operationId.includes('News')) return 'news';
+    if (operationId.includes('geo') || operationId.includes('location')) return 'geolocation';
+    return 'general';
+  }
+
+  // Helper method to get workflow examples
+  getWorkflowExamples() {
+    return [
+      {
+        name: "Simple Weather Check",
+        description: "Single-step workflow to check weather",
+        workflow: {
+          name: "Check Weather",
+          steps: [
+            { operation: "getCurrentWeather", parameters: { q: "Kuala Lumpur" } }
+          ]
+        }
+      },
+      {
+        name: "Banking Dashboard",
+        description: "Multi-step banking overview",
+        workflow: {
+          name: "Financial Overview",
+          steps: [
+            { operation: "getBalance", parameters: {} },
+            { operation: "getExpensesSummary", parameters: { period: "month" } },
+            { operation: "getBillPaymentStatus", parameters: {} }
+          ]
+        }
+      },
+      {
+        name: "Cross-Domain Analysis",
+        description: "Combine weather and financial data",
+        workflow: {
+          name: "Weather-Based Financial Insights",
+          steps: [
+            { id: "weather", operation: "getCurrentWeather", parameters: { q: "KL" } },
+            { id: "balance", operation: "getBalance", parameters: {} },
+            { id: "synthesis", operation: "synthesize_financial_overview", dependencies: ["weather", "balance"] }
+          ]
+        }
+      }
+    ];
+  }
+
+  // Helper method to identify innovative workflows worth saving
+  isInnovativeWorkflow(workflowPlan) {
+    try {
+      if (!workflowPlan || !workflowPlan.steps || !Array.isArray(workflowPlan.steps)) {
+        return false;
+      }
+      
+      // Consider it innovative if:
+      // 1. Has multiple steps (composition)
+      const multiStep = workflowPlan.steps.length > 1;
+      
+      // 2. Combines different domains
+      const domains = new Set();
+      for (const step of workflowPlan.steps) {
+        if (!step || !step.operation) continue;
+        
+        if (step.operation.includes('weather')) domains.add('weather');
+        if (step.operation.includes('banking') || step.operation.includes('Balance')) domains.add('banking');
+        if (step.operation.includes('currency')) domains.add('currency');
+        if (step.operation.includes('expense')) domains.add('expenses');
+      }
+      const crossDomain = domains.size > 1;
+      
+      // 3. Has synthesize or analyze operations
+      const hasSynthesis = workflowPlan.steps.some(step => 
+        step && step.operation && (
+          step.operation.includes('synthesize') || 
+          step.operation.includes('analyze') ||
+          step.operation.includes('create_comprehensive')
+        )
+      );
+      
+      // 4. Has data flow connections
+      const hasDataFlow = workflowPlan.dataFlowMap && workflowPlan.dataFlowMap.size > 0;
+      
+      return multiStep && (crossDomain || hasSynthesis || hasDataFlow);
+    } catch (error) {
+      logger.warn('Error checking if workflow is innovative', { error: error.message });
+      return false;
+    }
   }
 
   // PHASE 3: Handle workflow tool calls
@@ -1138,10 +1289,44 @@ class MCPGatewayServer {
       
       switch (toolName) {
         case 'execute_workflow':
-          result = await this.workflowEngine.executeWorkflow(
-            arguments_.workflowName, 
-            arguments_.parameters || {}
-          );
+          // Handle both old workflowName and new workflowId
+          if (arguments_.workflowId) {
+            // Phase 4.9: Execute saved workflow by ID
+            try {
+              // Load workflow from persistence
+              const workflow = await this.persistenceManager.getWorkflow(arguments_.workflowId);
+              if (!workflow) {
+                throw new Error(`Workflow '${arguments_.workflowId}' not found`);
+              }
+              
+              logger.info('Executing saved workflow', {
+                workflowId: arguments_.workflowId,
+                name: workflow.name
+              });
+              
+              result = await this.dynamicExecutor.executeWorkflow(workflow);
+            } catch (error) {
+              logger.error('Saved workflow execution failed', { 
+                workflowId: arguments_.workflowId,
+                error: error.message 
+              });
+              result = {
+                success: false,
+                error: `Workflow execution failed: ${error.message}`
+              };
+            }
+          } else if (arguments_.workflowName) {
+            // Legacy: Execute predefined workflow by name
+            result = await this.workflowEngine.executeWorkflow(
+              arguments_.workflowName, 
+              arguments_.parameters || {}
+            );
+          } else {
+            result = {
+              success: false,
+              error: 'Either workflowId or workflowName is required'
+            };
+          }
           break;
           
         case 'plan_workflow':
@@ -1161,14 +1346,27 @@ class MCPGatewayServer {
           break;
           
         case 'list_workflows':
-          const workflows = this.workflowEngine.getAllWorkflows();
-          result = {
-            success: true,
-            data: {
-              workflows: workflows,
-              totalCount: workflows.length
-            }
-          };
+          try {
+            // Get both predefined workflows and saved workflows
+            const predefinedWorkflows = this.workflowEngine?.getAllWorkflows() || [];
+            const savedWorkflows = await this.persistenceManager.getWorkflowLibrary({ limit: 50 });
+            
+            result = {
+              success: true,
+              data: {
+                predefinedWorkflows: predefinedWorkflows,
+                savedWorkflows: savedWorkflows.workflows || [],
+                total: predefinedWorkflows.length + (savedWorkflows.workflows || []).length,
+                metadata: savedWorkflows.metadata || {}
+              }
+            };
+          } catch (error) {
+            logger.error('Failed to list workflows', { error: error.message });
+            result = {
+              success: false,
+              error: `Failed to list workflows: ${error.message}`
+            };
+          }
           break;
           
         case 'suggest_workflows':
@@ -1331,17 +1529,24 @@ class MCPGatewayServer {
 
       switch (toolName) {
         case 'execute_workflow':
+          // Handle both old and new response formats
+          const executedSteps = result.metrics?.stepsExecuted || result.metadata?.executedSteps || 0;
+          const totalSteps = result.summary?.totalSteps || result.metadata?.totalSteps || 0;
+          const workflowName = result.workflowName || result.name || 'Workflow';
+          const duration = result.metrics?.totalTime || result.duration || 0;
+          
           if (result.partialSuccess) {
-            return `🔄 Workflow '${result.workflowName}' completed with partial success\n\n` +
-                   `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
-                   `Duration: ${result.duration}ms\n\n` +
+            return `🔄 Workflow '${workflowName}' completed with partial success\n\n` +
+                   `Executed ${executedSteps}/${totalSteps} steps\n` +
+                   `Duration: ${duration}ms\n\n` +
                    `Warning: ${result.error}\n\n` +
-                   `Results:\n${JSON.stringify(result.data, null, 2)}`;
+                   `Results:\n${JSON.stringify(result.stepResults || result.data, null, 2)}`;
           } else {
-            return `✅ Workflow '${result.workflowName}' completed successfully\n\n` +
-                   `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
-                   `Duration: ${result.duration}ms\n\n` +
-                   `Results:\n${JSON.stringify(result.data, null, 2)}`;
+            return `✅ Workflow '${workflowName}' completed successfully\n\n` +
+                   `Executed ${executedSteps}/${totalSteps} steps\n` +
+                   `Duration: ${duration}ms\n\n` +
+                   `Success Rate: ${result.metrics?.successRate || '100'}%\n\n` +
+                   `Results:\n${JSON.stringify(result.stepResults || result.data, null, 2)}`;
           }
           
         case 'plan_workflow':
@@ -1355,11 +1560,27 @@ class MCPGatewayServer {
                  `Reasoning:\n${plan.reasoning.join('\n')}`;
           
         case 'list_workflows':
-          const workflows = result.data.workflows;
-          return `📚 Available Workflows (${workflows.length})\n\n` +
-                 workflows.map(w => 
-                   `• ${w.displayName}\n  Steps: ${w.stepCount}, Est. Time: ${w.estimatedTime}ms\n  ${w.description}`
-                 ).join('\n\n');
+          const predefinedWorkflows = result.data.predefinedWorkflows || [];
+          const savedWorkflows = result.data.savedWorkflows || [];
+          const total = result.data.total || 0;
+          
+          let output = `📚 Available Workflows (${total})\n\n`;
+          
+          if (predefinedWorkflows.length > 0) {
+            output += `**Predefined Workflows (${predefinedWorkflows.length}):**\n`;
+            output += predefinedWorkflows.map(w => 
+              `• ${w.displayName || w.name}\n  Steps: ${w.stepCount || 'N/A'}, Est. Time: ${w.estimatedTime || 'N/A'}ms\n  ${w.description || 'No description'}`
+            ).join('\n\n') + '\n\n';
+          }
+          
+          if (savedWorkflows.length > 0) {
+            output += `**Saved Workflows (${savedWorkflows.length}):**\n`;
+            output += savedWorkflows.map(w => 
+              `• ${w.name} (ID: ${w.id})\n  Steps: ${w.steps?.length || 0}, Tags: ${w.tags?.join(', ') || 'none'}\n  ${w.description || 'No description'}`
+            ).join('\n\n');
+          }
+          
+          return output;
           
         case 'suggest_workflows':
           const suggestions = result.data.suggestions;
@@ -1374,7 +1595,7 @@ class MCPGatewayServer {
           
         case 'execute_custom_workflow':
           return `🔧 Custom workflow completed\n\n` +
-                 `Executed ${result.metadata.executedSteps}/${result.metadata.totalSteps} steps\n` +
+                 `Executed ${result.metrics?.stepsExecuted || result.metadata?.executedSteps || 0}/${result.summary?.totalSteps || result.metadata?.totalSteps || 0} steps\n` +
                  `Duration: ${result.duration}ms\n\n` +
                  `Results:\n${JSON.stringify(result.data, null, 2)}`;
           
@@ -1438,8 +1659,8 @@ class MCPGatewayServer {
       }
       
       // 2. Validate input arguments
-      const tool = this.createToolFromOperation(operationDetails);
-      const validation = Validators.validateToolArguments(arguments_, tool.inputSchema);
+      // const tool = this.createToolFromOperation(operationDetails);
+      // const validation = Validators.validateToolArguments(arguments_, tool.inputSchema);
       
       // if (!validation.valid) {
       //   throw new Error(`Argument validation failed: ${validation.errors.join(', ')}`);
@@ -1786,13 +2007,56 @@ class MCPGatewayServer {
         case 'execute_dynamic_workflow':
           result = await this.dynamicExecutor.executeWorkflow(
             arguments_.workflowPlan,
-            arguments_.parameters || {},
-            { enableLearning: arguments_.enableLearning !== false }
+            { 
+              parameters: arguments_.parameters || {},
+              enableLearning: arguments_.enableLearning !== false 
+            }
           );
           
           // Learn from execution if enabled
           if (arguments_.enableLearning !== false && result.success) {
             await this.adaptiveLearner.learnFromExecution(arguments_.workflowPlan, result);
+            
+            // Auto-save innovative workflows to persistent storage
+            if (this.isInnovativeWorkflow(arguments_.workflowPlan)) {
+              try {
+                // Ensure workflowPlan has all required properties
+                const workflowToSave = {
+                  id: arguments_.workflowPlan.id || `wf_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+                  name: arguments_.workflowPlan.name || 'Auto-saved Innovative Workflow',
+                  description: arguments_.workflowPlan.description || 'Automatically saved innovative workflow from desktop execution',
+                  steps: arguments_.workflowPlan.steps || [],
+                  dataFlowMap: arguments_.workflowPlan.dataFlowMap || null,
+                  executionResults: result,
+                  metadata: {
+                    autoSaved: true,
+                    savedAt: new Date().toISOString(),
+                    successfulExecution: true,
+                    originalPlan: arguments_.workflowPlan
+                  }
+                };
+                
+                logger.debug('Attempting to auto-save workflow', {
+                  workflowId: workflowToSave.id,
+                  stepCount: workflowToSave.steps.length,
+                  hasDataFlow: !!workflowToSave.dataFlowMap
+                });
+                
+                const saveResult = await this.persistenceManager.saveInnovativeWorkflow(workflowToSave);
+                
+                logger.info('Innovative workflow auto-saved', {
+                  workflowId: saveResult.workflowId,
+                  success: saveResult.success,
+                  location: saveResult.location
+                });
+              } catch (saveError) {
+                logger.error('Failed to auto-save innovative workflow', {
+                  error: saveError.message,
+                  stack: saveError.stack,
+                  workflowPlan: JSON.stringify(arguments_.workflowPlan, null, 2)
+                });
+              }
+            }
           }
           break;
           
@@ -1856,6 +2120,88 @@ class MCPGatewayServer {
             success: saveResult.success,
             workflowId: saveResult.workflowId,
             version: saveResult.version
+          };
+          break;
+          
+        case 'get_workflow_schema':
+          // Generate schema documentation dynamically
+          const operations = this.registry.getAllOperations();
+          const operationsByDomain = {};
+          
+          // Group operations by domain
+          for (const op of operations) {
+            const domain = this.extractOperationDomain(op.operationId);
+            if (!operationsByDomain[domain]) {
+              operationsByDomain[domain] = [];
+            }
+            operationsByDomain[domain].push({
+              id: op.operationId,
+              description: op.description,
+              parameters: op.parameters || {}
+            });
+          }
+          
+          // Filter by domain if requested
+          const filteredOperations = arguments_.operationFilter
+            ? { [arguments_.operationFilter]: operationsByDomain[arguments_.operationFilter] || [] }
+            : operationsByDomain;
+          
+          result = {
+            success: true,
+            schema: {
+              basic: {
+                id: "string (optional, auto-generated)",
+                name: "string (optional)",
+                description: "string (optional)",
+                steps: [{
+                  id: "string (optional)",
+                  operation: "string (required)",
+                  parameters: "object (optional)",
+                  order: "number (optional)",
+                  dependencies: "array of step IDs (optional)"
+                }],
+                tags: "array of strings (optional)"
+              },
+              required: ["steps"],
+              stepRequired: ["operation"]
+            },
+            operations: filteredOperations,
+            operationCount: Object.values(filteredOperations).flat().length,
+            examples: arguments_.includeExamples !== false ? this.getWorkflowExamples() : null
+          };
+          break;
+          
+        case 'save_workflow':
+          // Prepare workflow with defaults if needed
+          const workflowToSave = {
+            id: arguments_.workflow.id || `wf_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+            name: arguments_.workflow.name || 'User Saved Workflow',
+            description: arguments_.workflow.description || 'Workflow saved by user request',
+            steps: arguments_.workflow.steps || [],
+            tags: arguments_.tags || [],
+            userSaved: true,
+            savedAt: new Date().toISOString()
+          };
+          
+          logger.info('User explicitly saving workflow', {
+            workflowId: workflowToSave.id,
+            stepCount: workflowToSave.steps.length,
+            tags: workflowToSave.tags
+          });
+          
+          const userSaveResult = await this.persistenceManager.saveInnovativeWorkflow({
+            ...workflowToSave,
+            metadata: {
+              source: 'user_explicit_save',
+              tags: arguments_.tags || []
+            }
+          });
+          
+          result = {
+            success: userSaveResult.success,
+            workflowId: userSaveResult.workflowId,
+            version: userSaveResult.version,
+            location: userSaveResult.location
           };
           break;
           
@@ -2016,6 +2362,51 @@ class MCPGatewayServer {
                  `**Version:** ${result.version}\n` +
                  `**Status:** Saved to persistent library\n\n` +
                  `The innovative workflow is now available for future reuse and learning.`;
+          
+        case 'save_workflow':
+          if (!result.success) {
+            return `❌ **Failed to Save Workflow**\n\n${result.error}`;
+          }
+          
+          return `💾 **Workflow Saved Successfully**\n\n` +
+                 `**Workflow ID:** ${result.workflowId}\n` +
+                 `**Version:** ${result.version}\n` +
+                 `**Location:** ${result.location}\n` +
+                 `**Status:** Saved to persistent storage\n\n` +
+                 `Your workflow has been saved and is available for future use. You can recall it using the workflow ID.`;
+          
+        case 'get_workflow_schema':
+          if (!result.success) {
+            return `❌ **Failed to Get Schema**\n\n${result.error}`;
+          }
+          
+          let response = `📋 **Workflow Schema Documentation**\n\n`;
+          
+          // Schema section
+          response += `**Basic Workflow Structure:**\n\`\`\`json\n${JSON.stringify(result.schema.basic, null, 2)}\n\`\`\`\n\n`;
+          response += `**Required Fields:** ${result.schema.required.join(', ')}\n`;
+          response += `**Required Step Fields:** ${result.schema.stepRequired.join(', ')}\n\n`;
+          
+          // Operations section
+          response += `**Available Operations (${result.operationCount} total):**\n`;
+          for (const [domain, ops] of Object.entries(result.operations)) {
+            response += `\n📁 **${domain.charAt(0).toUpperCase() + domain.slice(1)} APIs:**\n`;
+            for (const op of ops) {
+              response += `• \`${op.id}\` - ${op.description}\n`;
+            }
+          }
+          
+          // Examples section
+          if (result.examples) {
+            response += `\n**Example Workflows:**\n`;
+            for (const example of result.examples) {
+              response += `\n🔹 **${example.name}**\n`;
+              response += `${example.description}\n`;
+              response += `\`\`\`json\n${JSON.stringify(example.workflow, null, 2)}\n\`\`\`\n`;
+            }
+          }
+          
+          return response;
           
         case 'get_fusion_insights':
           if (!result.success) {

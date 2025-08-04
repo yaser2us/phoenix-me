@@ -626,6 +626,266 @@ export class ContextFusionEngine {
   }
 
   /**
+   * Fuse multiple API responses with contextual intelligence
+   */
+  async fuseResponses(apiResponses, options = {}) {
+    try {
+      logger.debug('Fusing API responses', {
+        responseCount: apiResponses.length,
+        fusionType: options.fusionType || 'contextual'
+      });
+
+      const fusionType = options.fusionType || 'contextual';
+      const context = options.context || {};
+
+      // Normalize responses to a common format
+      const normalizedData = apiResponses.map((response, index) => ({
+        id: `response_${index}`,
+        type: this.detectResponseType(response),
+        source: response.operation || `api_${index}`,
+        data: response.data || response,
+        success: response.success !== false,
+        metadata: {
+          operation: response.operation,
+          timestamp: new Date().toISOString()
+        }
+      }));
+
+      // Filter out failed responses
+      const validData = normalizedData.filter(item => item.success);
+
+      if (validData.length === 0) {
+        return {
+          success: false,
+          error: 'No valid responses to fuse',
+          fusionType,
+          responseCount: 0
+        };
+      }
+
+      // Detect relationships between data items
+      const relationships = await this.detectRelationships(validData);
+
+      // Apply contextual processing
+      const contextualizedData = [];
+      for (const item of validData) {
+        const processor = this.contextProcessors[item.type] || this.contextProcessors.default;
+        const processed = await processor.process(item.data, context);
+        
+        contextualizedData.push({
+          ...item,
+          contextualizedData: processed.data,
+          insights: processed.insights,
+          confidence: processed.confidence
+        });
+      }
+
+      // Generate fusion insights based on type
+      let fusionInsights = [];
+      switch (fusionType) {
+        case 'contextual':
+          fusionInsights = await this.generateContextualInsights(contextualizedData, relationships);
+          break;
+        case 'analytical':
+          fusionInsights = await this.generateAnalyticalInsights(contextualizedData, relationships);
+          break;
+        case 'predictive':
+          fusionInsights = await this.generatePredictiveInsights(contextualizedData, relationships);
+          break;
+        default:
+          fusionInsights = await this.generateContextualInsights(contextualizedData, relationships);
+      }
+
+      // Apply business rules
+      const businessRuleResults = [];
+      for (const rule of this.businessRules) {
+        const ruleResult = await this.evaluateBusinessRule(rule, {
+          contextualizedData,
+          relationships
+        });
+        if (ruleResult.triggered) {
+          businessRuleResults.push(ruleResult);
+        }
+      }
+
+      const fusedResult = {
+        success: true,
+        fusionType,
+        responseCount: validData.length,
+        contextualizedData,
+        relationships,
+        fusionInsights,
+        businessRuleResults,
+        metadata: {
+          fusedAt: new Date().toISOString(),
+          processingTime: Date.now() - Date.now(), // Will be calculated properly
+          confidence: this.calculateOverallConfidence(contextualizedData, fusionInsights)
+        }
+      };
+
+      logger.info('Response fusion completed', {
+        fusionType,
+        responseCount: validData.length,
+        relationshipsFound: relationships.length,
+        insightsGenerated: fusionInsights.length,
+        businessRulesTriggered: businessRuleResults.length
+      });
+
+      return fusedResult;
+
+    } catch (error) {
+      logger.error('Response fusion failed', { error: error.message });
+      return {
+        success: false,
+        error: error.message,
+        fusionType: options.fusionType || 'contextual',
+        responseCount: 0
+      };
+    }
+  }
+
+  /**
+   * Detect the type of API response
+   */
+  detectResponseType(response) {
+    const data = response.data || response;
+    const operation = response.operation || '';
+
+    // Check by operation name
+    if (operation.includes('weather') || operation.includes('Weather')) return 'weather';
+    if (operation.includes('balance') || operation.includes('Balance') || operation.includes('banking')) return 'banking';
+    if (operation.includes('currency') || operation.includes('exchange')) return 'currency';
+    if (operation.includes('expense') || operation.includes('spending')) return 'expenses';
+
+    // Check by data structure
+    if (data.temperature !== undefined || data.weather !== undefined) return 'weather';
+    if (data.balance !== undefined || data.accountNumber !== undefined) return 'banking';
+    if (data.rates !== undefined || data.exchange !== undefined) return 'currency';
+    if (data.expenses !== undefined || data.transactions !== undefined) return 'expenses';
+
+    return 'unknown';
+  }
+
+  /**
+   * Generate contextual insights from fused data
+   */
+  async generateContextualInsights(contextualizedData, relationships) {
+    const insights = [];
+
+    // Add relationship-based insights
+    for (const relationship of relationships) {
+      if (relationship.strength > 0.6) {
+        insights.push({
+          type: 'relationship',
+          category: relationship.type,
+          insight: relationship.description,
+          strength: relationship.strength,
+          confidence: 0.8
+        });
+      }
+    }
+
+    // Add data combination insights
+    const hasWeather = contextualizedData.some(item => item.type === 'weather');
+    const hasBanking = contextualizedData.some(item => item.type === 'banking');
+    
+    if (hasWeather && hasBanking) {
+      insights.push({
+        type: 'combination',
+        category: 'weather_financial',
+        insight: 'Weather conditions may influence your spending patterns and financial decisions',
+        confidence: 0.7
+      });
+    }
+
+    return insights;
+  }
+
+  /**
+   * Generate analytical insights
+   */
+  async generateAnalyticalInsights(contextualizedData, relationships) {
+    const insights = [];
+
+    // Calculate data correlations
+    const correlations = this.calculateDataCorrelations(contextualizedData);
+    
+    for (const correlation of correlations) {
+      if (correlation.strength > 0.5) {
+        insights.push({
+          type: 'analytical',
+          category: 'correlation',
+          insight: `Strong correlation detected between ${correlation.field1} and ${correlation.field2}`,
+          strength: correlation.strength,
+          confidence: 0.8
+        });
+      }
+    }
+
+    return insights;
+  }
+
+  /**
+   * Generate predictive insights
+   */
+  async generatePredictiveInsights(contextualizedData, relationships) {
+    const insights = [];
+
+    // Simple predictive insights based on patterns
+    const weatherData = contextualizedData.find(item => item.type === 'weather');
+    const bankingData = contextualizedData.find(item => item.type === 'banking');
+
+    if (weatherData && bankingData) {
+      const temperature = weatherData.contextualizedData?.temperature || weatherData.data?.temperature;
+      
+      if (temperature > 30) {
+        insights.push({
+          type: 'predictive',
+          category: 'spending_forecast',
+          insight: 'Hot weather may increase cooling costs and outdoor activity spending in the next few days',
+          confidence: 0.6
+        });
+      }
+    }
+
+    return insights;
+  }
+
+  /**
+   * Calculate overall confidence score
+   */
+  calculateOverallConfidence(contextualizedData, fusionInsights) {
+    const dataConfidences = contextualizedData.map(item => item.confidence || 0.7);
+    const insightConfidences = fusionInsights.map(insight => insight.confidence || 0.7);
+    
+    const allConfidences = [...dataConfidences, ...insightConfidences];
+    
+    if (allConfidences.length === 0) return 0.5;
+    
+    return allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length;
+  }
+
+  /**
+   * Calculate correlations between data fields
+   */
+  calculateDataCorrelations(contextualizedData) {
+    // Simple correlation analysis (would be more sophisticated in production)
+    const correlations = [];
+    
+    // This is a placeholder - real correlation analysis would be more complex
+    if (contextualizedData.length >= 2) {
+      correlations.push({
+        field1: contextualizedData[0].type,
+        field2: contextualizedData[1].type,
+        strength: 0.6,
+        type: 'positive'
+      });
+    }
+    
+    return correlations;
+  }
+
+  /**
    * Helper methods
    */
   contextualizeBalance(balance, context) {

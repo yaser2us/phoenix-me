@@ -1,0 +1,31 @@
+{
+  "id": "wf_1754301811868_kgdmcj",
+  "name": "Directory Fix Test",
+  "description": "Test workflow to verify directory creation fix",
+  "steps": [
+    {
+      "operation": "getCurrentWeather",
+      "parameters": {
+        "q": "Sydney"
+      },
+      "order": 1
+    }
+  ],
+  "tags": [
+    "test",
+    "directory-fix"
+  ],
+  "userSaved": true,
+  "savedAt": "2025-08-04T10:03:31.868Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "75013247",
+      "metadata": "19874894c9c"
+    }
+  },
+  "persistedAt": "2025-08-04T10:03:31.868Z",
+  "version": "1.0"
+}

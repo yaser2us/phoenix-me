@@ -1,0 +1,128 @@
+{
+  "id": "wf_1754303949870_zxzcun",
+  "name": "Revolutionary Expense Tracking API",
+  "description": "Comprehensive expense tracking system with spending analysis, account monitoring, and intelligent financial insights",
+  "steps": [
+    {
+      "id": "balance_check",
+      "operation": "get_banking_getBalance",
+      "parameters": {
+        "isFirstLoad": "true",
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-001"
+      }
+    },
+    {
+      "id": "account_summary",
+      "operation": "get_banking_summary",
+      "parameters": {
+        "type": "full",
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-002"
+      }
+    },
+    {
+      "id": "all_accounts",
+      "operation": "get_banking_all",
+      "parameters": {
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-003"
+      }
+    },
+    {
+      "id": "spending_pattern",
+      "operation": "get_pfm_spendingPattern",
+      "parameters": {
+        "month": "2025-08",
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-004"
+      }
+    },
+    {
+      "id": "transaction_history",
+      "operation": "get_pfm_history",
+      "parameters": {
+        "startDate": "2025-07-01",
+        "endDate": "2025-08-04",
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-005"
+      }
+    },
+    {
+      "id": "weekly_analysis",
+      "operation": "get_pfm_weekly",
+      "parameters": {
+        "module": "expense",
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-006"
+      }
+    },
+    {
+      "id": "account_cards",
+      "operation": "get_pfm_accountCardList",
+      "parameters": {
+        "Accept": "application/json",
+        "X-APP-PLATFORM": "web",
+        "X-APP-VERSION": "1.0.0",
+        "X-APP-ENVIRONMENT": "production",
+        "X-APP-BUILD-NO": "1000",
+        "X-APP-RELEASE-NO": "1.0",
+        "X-APP-SESSION-TRACE-ID": "expense-track-007"
+      }
+    }
+  ],
+  "tags": [
+    "expense-tracking",
+    "financial-analysis",
+    "banking",
+    "pfm",
+    "revolutionary"
+  ],
+  "userSaved": true,
+  "savedAt": "2025-08-04T10:39:09.870Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [
+      "financial",
+      "ai-enhanced",
+      "complex"
+    ],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "7257d649",
+      "metadata": "19874a9ec2f"
+    }
+  },
+  "persistedAt": "2025-08-04T10:39:09.871Z",
+  "version": "1.0"
+}

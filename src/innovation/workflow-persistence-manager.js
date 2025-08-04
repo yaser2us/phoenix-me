@@ -1,6 +1,10 @@
 import { logger } from '../utils/logger.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Workflow Persistence Manager - Phase 4.9 Checkpoint 5
@@ -8,7 +12,8 @@ import path from 'path';
  */
 export class WorkflowPersistenceManager {
   constructor() {
-    this.persistenceDir = './data/workflows';
+    // Use absolute path relative to project root
+    this.persistenceDir = path.resolve(__dirname, '../../data/workflows');
     this.workflowLibrary = new Map();
     this.workflowVersions = new Map();
     this.libraryMetadata = {
@@ -18,6 +23,7 @@ export class WorkflowPersistenceManager {
       version: '1.0.0'
     };
     
+    this.initialized = false;
     this.initializePersistence();
     
     logger.info('Workflow Persistence Manager initialized');
@@ -204,6 +210,27 @@ export class WorkflowPersistenceManager {
       logger.error('Workflow version save failed', { error: error.message });
       throw error;
     }
+  }
+
+  /**
+   * Ensure persistence is initialized (wait if needed)
+   */
+  async ensureInitialized() {
+    if (!this.initialized) {
+      // Wait a bit for initialization to complete
+      for (let i = 0; i < 50; i++) {
+        if (this.initialized) break;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  }
+
+  /**
+   * Get a specific workflow by ID
+   */
+  async getWorkflow(workflowId) {
+    await this.ensureInitialized();
+    return this.workflowLibrary.get(workflowId) || null;
   }
 
   /**
@@ -399,6 +426,7 @@ export class WorkflowPersistenceManager {
       // Load existing workflows
       await this.loadExistingWorkflows();
 
+      this.initialized = true;
       logger.info('Persistence system initialized', {
         persistenceDir: this.persistenceDir,
         loadedWorkflows: this.workflowLibrary.size
@@ -457,13 +485,24 @@ export class WorkflowPersistenceManager {
    */
   async saveToFileSystem(workflowId, workflow) {
     try {
+      // Ensure directory exists
+      await fs.mkdir(this.persistenceDir, { recursive: true });
+      
       const filePath = path.join(this.persistenceDir, `${workflowId}.json`);
       await fs.writeFile(filePath, JSON.stringify(workflow, null, 2), 'utf8');
-    } catch (error) {
-      logger.warn('Failed to save workflow to file system', { 
+      
+      logger.debug('Workflow saved to file system', { 
         workflowId, 
-        error: error.message 
+        filePath,
+        fileSize: JSON.stringify(workflow, null, 2).length 
       });
+    } catch (error) {
+      logger.error('Failed to save workflow to file system', { 
+        workflowId, 
+        error: error.message,
+        persistenceDir: this.persistenceDir
+      });
+      throw error; // Re-throw to propagate the error
     }
   }
 
