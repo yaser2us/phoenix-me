@@ -221,10 +221,17 @@ export class DynamicWorkflowExecutor {
       // Prepare parameters (including data flow inputs)
       const parameters = await this.prepareStepParameters(step, executionContext);
       
-      // Execute the operation
+      // PHASE 5: Execute the operation with JWT session context
+      const executionOptions = {
+        sessionId: executionContext.options.sessionId || executionContext.id || 'default_session',
+        userId: executionContext.options.userId || 'default',
+        ...executionContext.options
+      };
+      
       const executionResult = await this.apiExecutor.executeOperation(
         step.operation,
-        parameters
+        parameters,
+        executionOptions
       );
       
       const stepResult = {

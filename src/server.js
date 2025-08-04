@@ -60,6 +60,7 @@ import { InnovationEngine } from './innovation/innovation-engine.js';
 import { WorkflowPersistenceManager } from './innovation/workflow-persistence-manager.js';
 import { SmartWorkflowBuilder } from './innovation/smart-workflow-builder.js';
 import { UsageAnalytics } from './innovation/usage-analytics.js';
+import { JWTPromptManager } from './authentication/jwt-prompt-manager.js';
 
 class MCPGatewayServer {
   constructor() {
@@ -389,6 +390,9 @@ class MCPGatewayServer {
 
       this.usageAnalytics = new UsageAnalytics();
       logger.info('Usage analytics initialized');
+      
+      this.jwtPromptManager = new JWTPromptManager();
+      logger.info('JWT prompt manager initialized');
 
       this.smartBuilder = new SmartWorkflowBuilder(
         this.registry,
@@ -471,6 +475,13 @@ class MCPGatewayServer {
         const phase49Tools = this.createPhase49Tools();
         tools.push(...phase49Tools);
         logger.info('Added Phase 4.9 dynamic composition tools', { count: phase49Tools.length });
+      }
+      
+      // Add Phase 5 JWT management tools
+      if (this.jwtPromptManager) {
+        const jwtTools = this.createJWTTools();
+        tools.push(...jwtTools);
+        logger.info('Added Phase 5 JWT management tools', { count: jwtTools.length });
       }
       
       // Store tools for the handlers (set up in constructor)
@@ -915,6 +926,16 @@ class MCPGatewayServer {
               type: "boolean",
               description: "Enable learning from execution results",
               default: true
+            },
+            sessionId: {
+              type: "string",
+              description: "Session ID for JWT token management (Phase 5)",
+              default: "default_session"
+            },
+            userId: {
+              type: "string", 
+              description: "User ID for multi-user JWT sessions (Phase 5)",
+              default: "default"
             }
           },
           required: ["workflowPlan"]
@@ -1133,6 +1154,70 @@ class MCPGatewayServer {
     return phase49Tools;
   }
 
+  // PHASE 5: Create JWT management tools for Claude Desktop integration
+  createJWTTools() {
+    const jwtTools = [
+      // Tool 1: Check JWT status for a session
+      {
+        name: "check_jwt_status",
+        description: "Check if the current session has a valid JWT token for Maybank operations",
+        inputSchema: {
+          type: "object",
+          properties: {
+            sessionId: {
+              type: "string",
+              description: "Session ID to check JWT status for",
+              default: "default_session"
+            },
+            userId: {
+              type: "string",
+              description: "User ID for multi-user sessions",
+              default: "default"
+            }
+          }
+        }
+      },
+
+      // Tool 2: Provide JWT token for pending prompts
+      {
+        name: "provide_jwt_token",
+        description: "Provide a JWT token to fulfill a pending prompt and continue execution",
+        inputSchema: {
+          type: "object",
+          properties: {
+            promptId: {
+              type: "string",
+              description: "The prompt ID requesting the JWT token"
+            },
+            jwtToken: {
+              type: "string",
+              description: "The JWT token to provide (full Bearer token with proper format)"
+            }
+          },
+          required: ["promptId", "jwtToken"]
+        }
+      },
+
+      // Tool 3: Get pending JWT prompts for a session
+      {
+        name: "get_jwt_prompts",
+        description: "Get all pending JWT token prompts for a session",
+        inputSchema: {
+          type: "object",
+          properties: {
+            sessionId: {
+              type: "string",
+              description: "Session ID to get prompts for",
+              default: "default_session"
+            }
+          }
+        }
+      }
+    ];
+
+    return jwtTools;
+  }
+
   // PHASE 3: Check if tool is a workflow tool
   isWorkflowTool(toolName) {
     const workflowToolNames = [
@@ -1184,6 +1269,16 @@ class MCPGatewayServer {
       'get_fusion_insights'
     ];
     return phase49ToolNames.includes(toolName);
+  }
+
+  // PHASE 5: Check if tool is a JWT management tool
+  isJWTTool(toolName) {
+    const jwtToolNames = [
+      'check_jwt_status',
+      'provide_jwt_token',
+      'get_jwt_prompts'
+    ];
+    return jwtToolNames.includes(toolName);
   }
 
   // Helper method to extract operation domain
@@ -1635,6 +1730,11 @@ class MCPGatewayServer {
         return await this.handlePhase49ToolCall(toolName, arguments_);
       }
 
+      // PHASE 5: Check if this is a JWT management tool
+      if (this.isJWTTool(toolName)) {
+        return await this.handleJWTToolCall(toolName, arguments_);
+      }
+
       // PHASE 4.2: Check if this is the Maybank interactive tool
       if (toolName === 'maybank_interactive') {
         return await this.handleMaybankInteractiveTool(arguments_);
@@ -2005,11 +2105,14 @@ class MCPGatewayServer {
           break;
           
         case 'execute_dynamic_workflow':
+          // PHASE 5: Pass JWT session context to dynamic workflow execution
           result = await this.dynamicExecutor.executeWorkflow(
             arguments_.workflowPlan,
             { 
               parameters: arguments_.parameters || {},
-              enableLearning: arguments_.enableLearning !== false 
+              enableLearning: arguments_.enableLearning !== false,
+              sessionId: arguments_.sessionId || 'default_session',
+              userId: arguments_.userId || 'default'
             }
           );
           
@@ -2502,6 +2605,193 @@ class MCPGatewayServer {
       
     } catch (error) {
       return `Error formatting validation response: ${error.message}\n\nRaw result:\n${JSON.stringify(result, null, 2)}`;
+    }
+  }
+
+  // PHASE 5: Handle JWT management tool calls
+  async handleJWTToolCall(toolName, arguments_) {
+    const startTime = Date.now();
+    
+    try {
+      let result;
+      
+      switch (toolName) {
+        case 'check_jwt_status':
+          const sessionId = arguments_.sessionId || 'default_session';
+          const userId = arguments_.userId || 'default';
+          
+          // Check if session has valid JWT token
+          try {
+            const validToken = await this.executor.jwtSessionManager.getValidToken(sessionId, userId);
+            const hasValidToken = !!validToken;
+            
+            result = {
+              success: true,
+              sessionId: sessionId,
+              userId: userId, 
+              hasValidToken: hasValidToken,
+              tokenStatus: hasValidToken ? 'valid' : 'missing_or_expired',
+              timestamp: new Date().toISOString()
+            };
+          } catch (error) {
+            result = {
+              success: true,
+              sessionId: sessionId,
+              userId: userId,
+              hasValidToken: false,
+              tokenStatus: 'error',
+              error: error.message,
+              timestamp: new Date().toISOString()
+            };
+          }
+          break;
+          
+        case 'provide_jwt_token':
+          if (!arguments_.promptId || !arguments_.jwtToken) {
+            result = {
+              success: false,
+              error: 'Both promptId and jwtToken are required'
+            };
+            break;
+          }
+          
+          try {
+            // PHASE 5 FIX: Use JWT Session Manager to resolve prompts
+            const completedSessionId = await this.executor.jwtSessionManager.provideTokenByPromptId(
+              arguments_.promptId, 
+              arguments_.jwtToken
+            );
+            
+            // Also complete in prompt manager for tracking
+            this.jwtPromptManager.completePrompt(arguments_.promptId, arguments_.jwtToken);
+            
+            result = {
+              success: true,
+              promptId: arguments_.promptId,
+              sessionId: completedSessionId,
+              status: 'token_provided',
+              message: 'JWT token provided successfully. Operations can now continue.',
+              timestamp: new Date().toISOString()
+            };
+          } catch (error) {
+            result = {
+              success: false,
+              error: `Failed to provide JWT token: ${error.message}`,
+              promptId: arguments_.promptId
+            };
+          }
+          break;
+          
+        case 'get_jwt_prompts':
+          const sessionIdForPrompts = arguments_.sessionId || 'default_session';
+          
+          try {
+            const pendingPrompts = this.jwtPromptManager.getPendingPrompts(sessionIdForPrompts);
+            const stats = this.jwtPromptManager.getStats();
+            
+            result = {
+              success: true,
+              sessionId: sessionIdForPrompts,
+              pendingPrompts: pendingPrompts,
+              promptCount: pendingPrompts.length,
+              totalPrompts: stats.totalPrompts,
+              timestamp: new Date().toISOString()
+            };
+          } catch (error) {
+            result = {
+              success: false,
+              error: `Failed to get JWT prompts: ${error.message}`,
+              sessionId: sessionIdForPrompts
+            };
+          }
+          break;
+          
+        default:
+          throw new Error(`Unknown JWT tool: ${toolName}`);
+      }
+      
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, result.success !== false, duration);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: this.formatJWTResponse(result, toolName)
+          }
+        ]
+      };
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.mcpToolResponse(toolName, false, duration);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `❌ JWT Tool Error: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+
+  // PHASE 5: Format JWT tool responses
+  formatJWTResponse(result, toolName) {
+    try {
+      switch (toolName) {
+        case 'check_jwt_status':
+          const statusIcon = result.hasValidToken ? '✅' : '⚠️';
+          return `${statusIcon} **JWT Token Status**\n\n` +
+                 `**Session:** ${result.sessionId}\n` +
+                 `**User:** ${result.userId}\n` +
+                 `**Status:** ${result.tokenStatus}\n` +
+                 `**Has Valid Token:** ${result.hasValidToken ? 'Yes' : 'No'}\n` +
+                 `${result.error ? `**Error:** ${result.error}\n` : ''}` +
+                 `**Checked:** ${result.timestamp}`;
+          
+        case 'provide_jwt_token':
+          if (!result.success) {
+            return `❌ **Failed to Provide JWT Token**\n\n${result.error}`;
+          }
+          
+          return `✅ **JWT Token Provided Successfully**\n\n` +
+                 `**Prompt ID:** ${result.promptId}\n` +
+                 `**Session:** ${result.sessionId}\n` +
+                 `**Status:** ${result.status}\n\n` +
+                 `${result.message}`;
+          
+        case 'get_jwt_prompts':
+          if (!result.success) {
+            return `❌ **Failed to Get JWT Prompts**\n\n${result.error}`;
+          }
+          
+          if (result.promptCount === 0) {
+            return `💡 **No Pending JWT Prompts**\n\n` +
+                   `**Session:** ${result.sessionId}\n` +
+                   `**Status:** No JWT tokens are currently being requested.`;
+          }
+          
+          return `🔑 **Pending JWT Prompts** (${result.promptCount})\n\n` +
+                 `**Session:** ${result.sessionId}\n` +
+                 `**Total Active Prompts:** ${result.totalPrompts}\n\n` +
+                 `**Pending Requests:**\n` +
+                 result.pendingPrompts.map((prompt, i) => 
+                   `${i + 1}. **Prompt ID:** ${prompt.promptId}\n` +
+                   `   **Operation:** ${prompt.operation}\n` +
+                   `   **Message:** ${prompt.message}\n` +
+                   `   **Requested:** ${prompt.timestamp}\n`
+                 ).join('\n') + 
+                 `\n*Use provide_jwt_token with the prompt ID and your JWT token to continue.*`;
+          
+        default:
+          return `JWT tool '${toolName}' completed\n\n${JSON.stringify(result, null, 2)}`;
+      }
+      
+    } catch (error) {
+      return `Error formatting JWT response: ${error.message}\n\nRaw result:\n${JSON.stringify(result, null, 2)}`;
     }
   }
 

@@ -92,9 +92,34 @@ export class InteractiveParameterCollector {
     const collectionState = this.activeCollections.get(collectionId);
     
     if (!collectionState) {
+      // Enhanced error message with debugging info
+      this.logger.error('Collection session not found', {
+        collectionId,
+        activeCollections: Array.from(this.activeCollections.keys()),
+        timestamp: new Date().toISOString()
+      });
+      
       return {
         success: false,
-        error: 'Collection session not found or expired'
+        error: 'Collection session not found or expired',
+        collectionId: collectionId,
+        availableSessions: Array.from(this.activeCollections.keys())
+      };
+    }
+    
+    // Check if session is already completed
+    if (collectionState.completed) {
+      this.logger.warn('Attempting to process input for completed collection', {
+        collectionId,
+        completedAt: collectionState.completedAt
+      });
+      
+      return {
+        success: true,
+        complete: true,
+        data: collectionState.currentData,
+        message: '✅ Collection already completed. Data is available.',
+        alreadyCompleted: true
       };
     }
     
@@ -139,8 +164,17 @@ export class InteractiveParameterCollector {
             }
           };
         } else {
-          // All fields collected
-          this.activeCollections.delete(collectionId);
+          // All fields collected - mark as completed but don't delete immediately
+          collectionState.completed = true;
+          collectionState.completedAt = new Date();
+          
+          // Schedule cleanup after 5 minutes to allow retry orchestrator to access data
+          setTimeout(() => {
+            if (this.activeCollections.has(collectionId)) {
+              this.logger.debug('Cleaning up completed collection session', { collectionId });
+              this.activeCollections.delete(collectionId);
+            }
+          }, 5 * 60 * 1000); // 5 minutes
           
           return {
             success: true,

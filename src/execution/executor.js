@@ -2,6 +2,7 @@ import axios from 'axios';
 import { RequestBuilder } from './request-builder.js';
 import { MaybankAdapter } from '../adapters/maybank-adapter.js';
 import { JWTManager } from '../authentication/jwt-manager.js';
+import { JWTSessionManager } from '../authentication/jwt-session-manager.js';
 import { logger } from '../utils/logger.js';
 import { debugLogger } from '../utils/debug-logger.js';
 
@@ -19,6 +20,7 @@ export class ApiExecutor {
     // Initialize Maybank adapter and JWT manager
     this.maybankAdapter = new MaybankAdapter(this.registry);
     this.jwtManager = new JWTManager();
+    this.jwtSessionManager = new JWTSessionManager();
     
     logger.info('ApiExecutor initialized with Maybank support');
   }
@@ -121,13 +123,45 @@ export class ApiExecutor {
 
   async makeHttpRequest(requestConfig) {
     try {
+      // PHASE 5 DIAGNOSTIC: Enhanced logging for JWT debugging
+      const isMaybankRequest = requestConfig.url?.includes('maya.maybank2u.com.my');
+      const authHeaders = {};
+      const allHeaders = requestConfig.headers || {};
+      
+      // Extract all authorization-related headers
+      Object.keys(allHeaders).forEach(key => {
+        if (key.toLowerCase().includes('authorization') || key.toLowerCase().includes('auth')) {
+          authHeaders[key] = allHeaders[key]?.substring(0, 50) + '...[TRUNCATED]';
+        }
+      });
+      
       logger.info('Making HTTP request', {
         method: requestConfig.method?.toUpperCase(),
         url: requestConfig.url,
+        isMaybankRequest,
         hasAuth: !!(requestConfig.headers?.Authorization || requestConfig.headers?.authorization),
+        authHeaders,
         headerCount: Object.keys(requestConfig.headers || {}).length,
-        hasBody: !!requestConfig.data
+        hasBody: !!requestConfig.data,
+        bodySize: requestConfig.data ? JSON.stringify(requestConfig.data).length : 0
       });
+      
+      // PHASE 5 DIAGNOSTIC: Full request logging for Maybank requests
+      if (isMaybankRequest) {
+        logger.info('MAYBANK REQUEST DETAILS', {
+          method: requestConfig.method,
+          url: requestConfig.url,
+          allHeaders: Object.keys(allHeaders).reduce((acc, key) => {
+            acc[key] = key.toLowerCase().includes('auth') ? 
+              allHeaders[key]?.substring(0, 50) + '...[TRUNCATED]' : 
+              allHeaders[key];
+            return acc;
+          }, {}),
+          hasData: !!requestConfig.data,
+          dataPreview: requestConfig.data ? JSON.stringify(requestConfig.data).substring(0, 200) + '...' : null,
+          params: requestConfig.params
+        });
+      }
       
       // Debug logging for payment operations
       if (requestConfig.url?.includes('favList')) {
@@ -223,6 +257,43 @@ export class ApiExecutor {
           headers: error.response.headers,
           data: data
         });
+        
+        // PHASE 5 DIAGNOSTIC: Special handling for 401 errors
+        if (status === 401) {
+          const isMaybankRequest = requestConfig.url?.includes('maya.maybank2u.com.my');
+          
+          logger.error('🚨 401 AUTHENTICATION FAILURE DETECTED', {
+            url: requestConfig.url,
+            method: requestConfig.method,
+            isMaybankRequest,
+            requestHeaders: Object.keys(requestConfig.headers || {}).reduce((acc, key) => {
+              acc[key] = key.toLowerCase().includes('auth') ? 
+                requestConfig.headers[key]?.substring(0, 30) + '...[TRUNCATED]' : 
+                requestConfig.headers[key];
+              return acc;
+            }, {}),
+            responseData: data,
+            responseHeaders: error.response.headers,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Additional Maybank-specific 401 diagnostics
+          if (isMaybankRequest) {
+            const authHeader = requestConfig.headers?.Authorization || 
+                              requestConfig.headers?.authorization ||
+                              requestConfig.headers?.['maya-authorization'];
+            
+            logger.error('🏦 MAYBANK 401 FAILURE ANALYSIS', {
+              hasAuthorizationHeader: !!authHeader,
+              authHeaderFormat: authHeader ? (authHeader.startsWith('Bearer ') ? 'Bearer' : 'Other') : 'None',
+              authHeaderLength: authHeader?.length || 0,
+              authHeaderPrefix: authHeader?.substring(0, 20) + '...',
+              requestPayload: requestConfig.data,
+              maybankErrorDetails: data,
+              suggestedFix: 'Check JWT token validity, format, and expiration'
+            });
+          }
+        }
         
         switch (status) {
           case 401:
@@ -375,11 +446,15 @@ export class ApiExecutor {
   // Prepare Maybank-specific request
   async prepareMaybankRequest(operationId, userParameters, options) {
     try {
-      // Extract JWT token from user parameters (headers) or options
-      let jwtToken = options.jwtToken;
+      // PHASE 5: Use JWT Session Manager for dynamic token management
+      const sessionId = options.sessionId || 'default_session';
+      const userId = options.userId || 'default';
+      
+      // First, try to extract JWT token from user parameters (headers) or options
+      let providedToken = options.jwtToken;
       
       // If no JWT token in options, try to extract from authorization headers
-      if (!jwtToken && userParameters) {
+      if (!providedToken && userParameters) {
         // Check various authorization header formats
         const authHeader = userParameters['authorization'] || 
                           userParameters['Authorization'] || 
@@ -396,32 +471,57 @@ export class ApiExecutor {
         
         if (authHeader) {
           // Extract token from "Bearer <token>" format
-          jwtToken = authHeader.replace(/^bearer\s+/i, '').replace(/^Bearer\s+/i, '');
+          providedToken = authHeader.replace(/^bearer\s+/i, '').replace(/^Bearer\s+/i, '');
           logger.debug('Extracted JWT token from authorization header', { 
-            hasToken: !!jwtToken, 
-            tokenLength: jwtToken?.length 
+            hasToken: !!providedToken, 
+            tokenLength: providedToken?.length 
           });
           
           if (operationId === 'get_payment_favList_1') {
             debugLogger.log('JWT_EXTRACTED', {
-              tokenLength: jwtToken?.length,
-              tokenPrefix: jwtToken?.substring(0, 20),
-              tokenSuffix: jwtToken?.substring(jwtToken.length - 20)
+              tokenLength: providedToken?.length,
+              tokenPrefix: providedToken?.substring(0, 20),
+              tokenSuffix: providedToken?.substring(providedToken.length - 20)
             });
-            debugLogger.logJWTAnalysis(jwtToken);
+            debugLogger.logJWTAnalysis(providedToken);
           }
         }
       }
       
-      if (!jwtToken) {
-        logger.info('No JWT token provided, using default token');
+      // If we have a provided token, store it in the session manager for future use
+      if (providedToken) {
+        await this.jwtSessionManager.storeToken(sessionId, providedToken, userId);
+        logger.debug('Stored provided JWT token in session manager', { sessionId, userId });
       }
-
-      // Validate JWT token format only if provided
-      if (jwtToken) {
-        const tokenValidation = await this.jwtManager.validateMaybankToken(jwtToken);
-        if (!tokenValidation.isValid) {
-          throw new Error(`Invalid JWT token: ${tokenValidation.reason}`);
+      
+      // Get valid token using JWT Session Manager (handles expiration and prompting)
+      let jwtToken;
+      try {
+        jwtToken = await this.jwtSessionManager.getValidToken(sessionId, userId, {
+          operation: operationId,
+          context: {
+            userParameters: Object.keys(userParameters || {}),
+            timestamp: new Date().toISOString()
+          }
+        });
+        
+        logger.debug('Retrieved valid JWT token from session manager', { 
+          sessionId, 
+          hasToken: !!jwtToken,
+          tokenLength: jwtToken?.length 
+        });
+      } catch (error) {
+        logger.error('Failed to get valid JWT token from session manager', {
+          sessionId,
+          userId,
+          operation: operationId,
+          error: error.message
+        });
+        
+        // If session manager fails, fall back to provided token or default behavior
+        jwtToken = providedToken;
+        if (!jwtToken) {
+          logger.info('No JWT token available, using default token');
         }
       }
 

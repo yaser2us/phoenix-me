@@ -43,12 +43,12 @@ export class MaybankAdapter {
     try {
       const { operation, jwtToken, parameters = {} } = requestData;
       
-      // Use provided token or fall back to default hardcoded token
-      const tokenToUse = jwtToken || this.DEFAULT_JWT_TOKEN;
-      
-      if (!tokenToUse) {
-        throw new Error('JWT token is required for Maybank API calls');
+      // PHASE 5 FIX: No fallback to hardcoded token - force proper JWT management
+      if (!jwtToken) {
+        throw new Error('JWT token is required for Maybank API calls. No token provided and hardcoded fallback disabled for security.');
       }
+      
+      const tokenToUse = jwtToken;
       
       logger.debug('Using JWT token', { 
         isDefault: !jwtToken, 
