@@ -1,0 +1,42 @@
+{
+  "id": "wf_1754300690282_evfpvp",
+  "name": "Complete Banking Dashboard",
+  "description": "Multiple banking operations in one workflow",
+  "steps": [
+    {
+      "operation": "getBalance",
+      "parameters": {},
+      "order": 1
+    },
+    {
+      "operation": "getExpensesSummary",
+      "parameters": {
+        "period": "month"
+      },
+      "order": 2
+    },
+    {
+      "operation": "getBillPaymentStatus",
+      "parameters": {},
+      "order": 3
+    }
+  ],
+  "tags": [
+    "banking",
+    "dashboard",
+    "financial"
+  ],
+  "userSaved": true,
+  "savedAt": "2025-08-04T09:44:50.282Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "4cc5096f",
+      "metadata": "19874782f6b"
+    }
+  },
+  "persistedAt": "2025-08-04T09:44:50.282Z",
+  "version": "1.0"
+}

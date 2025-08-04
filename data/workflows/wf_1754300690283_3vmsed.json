@@ -1,0 +1,28 @@
+{
+  "id": "wf_1754300690283_3vmsed",
+  "name": "User Saved Workflow",
+  "description": "Workflow saved by user request",
+  "steps": [
+    {
+      "operation": "getCurrencyRates",
+      "parameters": {
+        "base": "MYR"
+      },
+      "order": 1
+    }
+  ],
+  "tags": [],
+  "userSaved": true,
+  "savedAt": "2025-08-04T09:44:50.283Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "98bb1d4",
+      "metadata": "19874782f6b"
+    }
+  },
+  "persistedAt": "2025-08-04T09:44:50.283Z",
+  "version": "1.0"
+}

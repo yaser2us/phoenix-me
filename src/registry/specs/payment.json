@@ -1,0 +1,2860 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "payment API",
+        "description": "Auto-generated API specification for payment service",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://maya.maybank2u.com.my"
+        }
+    ],
+    "tags": [
+        {
+            "name": "payment/v1",
+            "description": "Operations for payment/v1"
+        }
+    ],
+    "paths": {
+        "/payment/v1/pay/bill": {
+            "post": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "Create bill",
+                "description": "Create a new bill",
+                "operationId": "post_payment_bill",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/pay_bill_body"
+                            },
+                            "example": {
+                                "accountType": null,
+                                "billAcctNo": "0176159404",
+                                "billRefNo": "01",
+                                "effectiveDateTime": "00000000",
+                                "fromAccount": "5140121213460000000",
+                                "fromAcctCode": "0Y",
+                                "onlinePayment": "1",
+                                "payeeCode": "1LT1",
+                                "tacrequired": "0",
+                                "transactionType": "BILL_PAYMENT_OTP_FAV",
+                                "transferAmount": 1,
+                                "tac": "",
+                                "startDate": "",
+                                "endDate": "",
+                                "mobileSDKData": {
+                                    "deviceDetail": "iOS",
+                                    "deviceId": "iPhone13,1",
+                                    "deviceModel": "iPhone 12 Mini",
+                                    "deviceName": "iPhone",
+                                    "devicePrint": "string",
+                                    "osType": "ios",
+                                    "osVersion": "18.6",
+                                    "rsaKey": "EE410B1DEEAC9412045EA5E64A2FF3C8",
+                                    "hardwareID": "27DC6797-7DF2-4C47-AFDA-E47480606CE3",
+                                    "screenSize": "375 x 812",
+                                    "languages": "en-MY",
+                                    "multitaskingSupported": true,
+                                    "timestamp": "2025-07-25T19:21:17Z",
+                                    "geoLocationInfo": {
+                                        "Latitude": "3.1532956",
+                                        "Longitude": "101.70519508",
+                                        "Status": "0",
+                                        "Timestamp": "1753471277976",
+                                        "HorizontalAccuracy": "20.12193885"
+                                    },
+                                    "emulator": 0,
+                                    "osId": "8BBF5C27-AAE4-4022-9C0F-33447F60BA9E",
+                                    "compromised": 0,
+                                    "sdkVersion": "6.1.0",
+                                    "appState": "active",
+                                    "keyChainErrorOnStoring": "Success",
+                                    "keyChainErrorOnRetrieve": "Success"
+                                },
+                                "type": "OPEN",
+                                "zakat": true,
+                                "donation": false,
+                                "zakatFitrah": false,
+                                "zakatType": "Zakat Pendapatan",
+                                "payeeName": "MAIPs - Perlis",
+                                "currentTxnDate": "00000000",
+                                "futureTxnDate": "",
+                                "twoFAType": "SECURE2U_PULL",
+                                "favLimitExceed": "Y"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200"
+                                },
+                                "example": {
+                                    "transactionRefNumber": "MC11111183756252220M",
+                                    "serverDate": "26 Jul 2025, 03:30 AM",
+                                    "pollingToken": null,
+                                    "pollingStart": null,
+                                    "pollingStatus": null,
+                                    "onHold": false,
+                                    "rsaStatus": null,
+                                    "challenge": null,
+                                    "formattedTransactionRefNumber": "756252220M",
+                                    "statusCode": "0",
+                                    "statusDescription": "Successful",
+                                    "additionalStatusDescription": null,
+                                    "additionalStatus": "0000",
+                                    "amount": "1",
+                                    "toCardNo": "0176159404",
+                                    "message": "Successful",
+                                    "token": "00000071766982300039624894323365",
+                                    "maskCardNo": "******9404"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/pay/payeeInquiry": {
+            "post": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "Create payeeInquiry",
+                "description": "Create a new payeeInquiry",
+                "operationId": "post_payment_payeeInquiry",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/pay_payeeInquiry_body"
+                            },
+                            "example": {
+                                "billAcctNo": "0176159404",
+                                "payeeCode": "1LT1"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_1"
+                                },
+                                "example": {
+                                    "statusCode": "0000",
+                                    "statusDescription": "Successful",
+                                    "additionalStatusDescription": null,
+                                    "policyHolderName": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/jompay/jompayPayment": {
+            "post": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "Create jompayPayment",
+                "description": "Create a new jompayPayment",
+                "operationId": "post_payment_jompayPayment",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/jompay_jompayPayment_body"
+                            },
+                            "example": {
+                                "amount": 1,
+                                "billRef1": "210027549604",
+                                "billRef2": "",
+                                "billerAccount": "8010069888",
+                                "billerCode": "5454",
+                                "billerCodeName": "TENAGA NASIONAL BERHAD",
+                                "billerName": "TENAGA NASIONAL BERHAD",
+                                "effectiveDate": "00000000",
+                                "fromAcctCode": "0Y",
+                                "fromAcctNo": "5140121213460000000",
+                                "fromAcctType": "D",
+                                "msic": "35102",
+                                "nbpsRef": "C7Q3AE5B",
+                                "payeeCode": null,
+                                "routingCode": "100002050",
+                                "rrnDynamic": "N",
+                                "rtnRequired": "Y",
+                                "sig": "ETNPIM8BalSSZ4rkbrWKoU2Oc910Hijf7kldH3P983k=",
+                                "systemRef": "20250725-5454-C7Q3AE5B",
+                                "tac": "",
+                                "timestamp": "2025-07-25:19:29:40",
+                                "toAcctNo": "8010069888",
+                                "validateSig": "ih0SxeR9ikno9YwuHQ2jKE7wN5Ef0j2el+++nkxkiT8=",
+                                "mobileSDKData": {
+                                    "deviceDetail": "iOS",
+                                    "deviceId": "iPhone13,1",
+                                    "deviceModel": "iPhone 12 Mini",
+                                    "deviceName": "iPhone",
+                                    "devicePrint": "string",
+                                    "osType": "ios",
+                                    "osVersion": "18.6",
+                                    "rsaKey": "EE410B1DEEAC9412045EA5E64A2FF3C8",
+                                    "hardwareID": "27DC6797-7DF2-4C47-AFDA-E47480606CE3",
+                                    "screenSize": "375 x 812",
+                                    "languages": "en-MY",
+                                    "multitaskingSupported": true,
+                                    "timestamp": "2025-07-25T19:21:17Z",
+                                    "geoLocationInfo": {
+                                        "Latitude": "3.1532956",
+                                        "Longitude": "101.70519508",
+                                        "Status": "0",
+                                        "Timestamp": "1753471277976",
+                                        "HorizontalAccuracy": "20.12193885"
+                                    },
+                                    "emulator": 0,
+                                    "osId": "8BBF5C27-AAE4-4022-9C0F-33447F60BA9E",
+                                    "compromised": 0,
+                                    "sdkVersion": "6.1.0",
+                                    "appState": "active",
+                                    "keyChainErrorOnStoring": "Success",
+                                    "keyChainErrorOnRetrieve": "Success"
+                                },
+                                "type": "OPEN",
+                                "onUs": false,
+                                "twoFAType": "SECURE2U_PULL",
+                                "favLimitExceed": "Y"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_2"
+                                },
+                                "example": {
+                                    "transactionRefNumber": "MC11111183756242955M",
+                                    "serverDate": "26 Jul 2025, 3:29 AM",
+                                    "pollingToken": "00000071766982300039624893885215",
+                                    "pollingStart": true,
+                                    "pollingStatus": "Expired",
+                                    "onHold": false,
+                                    "rsaStatus": null,
+                                    "challenge": null,
+                                    "formattedTransactionRefNumber": "756242955M",
+                                    "statusCode": "0",
+                                    "statusDescription": "Successful",
+                                    "additionalStatusDescription": null,
+                                    "additionalStatus": "000",
+                                    "fromAccountBalance": "40404.0404",
+                                    "toAccountBalance": null,
+                                    "recipientAccountBalance": null,
+                                    "sendRcvId": null,
+                                    "s2w": null,
+                                    "merchantAppId": null,
+                                    "merchantUrl": null,
+                                    "bakongReferenceNo": null,
+                                    "bakongPaymentDetails": null,
+                                    "remittanceReferenceNo": null,
+                                    "remittancePaymentDetails": null,
+                                    "externalRefNo": null,
+                                    "tempTransactionId": null,
+                                    "transactionDigest": null,
+                                    "paymentRefNo": null,
+                                    "m2uAccountBalance": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/jompay/inquiry": {
+            "post": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "Create inquiry",
+                "description": "Create a new inquiry",
+                "operationId": "post_payment_inquiry",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/jompay_inquiry_body"
+                            },
+                            "example": {
+                                "amount": "1",
+                                "billerCode": "5454",
+                                "billRef1": "210027549604",
+                                "billRef2": "",
+                                "fromAccountTypeInd": "D"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_3"
+                                },
+                                "example": {
+                                    "statusCode": "0000",
+                                    "statusDesc": "Success",
+                                    "sig": "ETNPIM8BalSSZ4rkbrWKoU2Oc910Hijf7kldH3P983k=",
+                                    "systemRef": "20250725-5454-C7Q3AE5B",
+                                    "payeeCode": null,
+                                    "timestamp": "2025-07-25:19:29:47",
+                                    "nbpsRef": "C7Q3AE5B",
+                                    "billerName": "TENAGA NASIONAL BERHAD",
+                                    "billerCode": "5454",
+                                    "billerCodeName": "TENAGA NASIONAL BERHAD",
+                                    "billerAccount": "8010069888",
+                                    "routingCode": "100002050",
+                                    "msic": "35102",
+                                    "validateSig": "ih0SxeR9ikno9YwuHQ2jKE7wN5Ef0j2el+++nkxkiT8=",
+                                    "rtnRequired": "Y",
+                                    "rrnDynamic": "N",
+                                    "onUs": false,
+                                    "amount": "1.00",
+                                    "fromAcctType": "D",
+                                    "serviceFee": "0.00",
+                                    "serviceFeeText": "Note: No service charge applicable for DuitNow-Instant Transfer. To ensure transaction is successful, the Beneficiary Account must be valid and Payment Type is accepted by the receiving bank."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/zakat/payeeInquiry": {
+            "get": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "List payeeInquiry",
+                "description": "Get a list of payeeInquiry",
+                "operationId": "get_payment_payeeInquiry",
+                "parameters": [
+                    {
+                        "name": "payeeCode",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1LT1"
+                    },
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_4"
+                                },
+                                "example": {
+                                    "statusCode": "0000",
+                                    "statusDescription": "Successful",
+                                    "paymentTypes": [
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Pendapatan",
+                                            "code": "01",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Wang Simpanan",
+                                            "code": "02",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Perniagaan",
+                                            "code": "03",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Emas",
+                                            "code": "04",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Gaji",
+                                            "code": "05",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Harta Dan Lain-Lain",
+                                            "code": "30",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Tanaman",
+                                            "code": "06",
+                                            "zakatFlow": false
+                                        },
+                                        {
+                                            "zakatValues": null,
+                                            "label": "Zakat Ternakan",
+                                            "code": "31",
+                                            "zakatFlow": false
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/zakat/favList": {
+            "get": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "List favList",
+                "description": "Get a list of favList",
+                "operationId": "get_payment_favList",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_5"
+                                },
+                                "example": {
+                                    "selectedPageSize": 0,
+                                    "resultList": [
+                                        {
+                                            "oid": "94478",
+                                            "fullName": "MAIPs - Perlis",
+                                            "shortName": "MAIPs - Perlis",
+                                            "onlinePayment": "1",
+                                            "noteRequired": null,
+                                            "noteRequired2": null,
+                                            "noteRequired3": null,
+                                            "billAcctDispNameRequired": "0",
+                                            "bilAcctDispName": "Telephone No.",
+                                            "billRefDispNameRequired": "0",
+                                            "billRefDispName": "Type Of Zakat",
+                                            "billRefRequired": "0",
+                                            "billAcctRequired": "0",
+                                            "creditCardPayment": "1",
+                                            "minPayment": "1",
+                                            "minPaymentAmount": null,
+                                            "maxPayment": "0",
+                                            "maxPaymentAmount": "100000",
+                                            "typeOfPayment": "2",
+                                            "minCreditCardPayment": null,
+                                            "maxCreditCardPament": null,
+                                            "effectiveDate": "0",
+                                            "billAcctHolderDispNameReq": "1",
+                                            "billAccHolderName": null,
+                                            "serialNoIndicator": "1",
+                                            "serialNoName": null,
+                                            "rechargeCodeIndicator": "1",
+                                            "rechargeCodeName": null,
+                                            "payeeCode": "1LT1",
+                                            "pnPayeeIp": null,
+                                            "pnPriority": null,
+                                            "pnEstatus": "1",
+                                            "pnPayeeEmail1": null,
+                                            "pnPayeeEmail2": null,
+                                            "authenticationRequired": "1",
+                                            "tacRequired": "0",
+                                            "returnedLink": "1",
+                                            "payeeUrl": null,
+                                            "billRef2Required": "1",
+                                            "billRef2DispNameRequired": "1",
+                                            "billRef2DispName": null,
+                                            "recurringIndicator": "0",
+                                            "downtimeBit": "1",
+                                            "downtimeMessage": null,
+                                            "downStartDate": null,
+                                            "downEndDate": null,
+                                            "image": null,
+                                            "ebpp": null,
+                                            "payHist": null,
+                                            "acctId": "0176159404",
+                                            "billerCode": null,
+                                            "billerName": null,
+                                            "billRef1": null,
+                                            "billRef2": null,
+                                            "acctHolderName": null,
+                                            "paybill": true,
+                                            "jompay": false,
+                                            "imageName": "1LT.png",
+                                            "imageUrl": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/1LT.png",
+                                            "mbbAccountName": "Zakat Emas"
+                                        }
+                                    ],
+                                    "startPage": 0,
+                                    "endPage": 0,
+                                    "resultCount": 1,
+                                    "totalPage": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/jompay/favorite/inqury": {
+            "get": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "List inqury",
+                "description": "Get a list of inqury",
+                "operationId": "get_payment_inqury",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    },
+                    {
+                        "name": "x-mb-client-adapter",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "mae-favorites-jom-pay-inquiry"
+                    },
+                    {
+                        "name": "X-MB-E2E-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    },
+                    {
+                        "name": "X-MB-Timestamp",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1753471753488"
+                    },
+                    {
+                        "name": "X-MB-ENV",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "S"
+                    },
+                    {
+                        "name": "X-MB-Client-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "mae-fe-iv5p7"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_6"
+                                },
+                                "example": {
+                                    "payeeList": [
+                                        {
+                                            "billerCode": "5454",
+                                            "billerName": "TENAGA NASIONAL BE",
+                                            "billRef1": "210027549604",
+                                            "billRef2": "",
+                                            "acctHolderName": "TENAGA NASIONAL BERHAD"
+                                        }
+                                    ],
+                                    "statusCode": "0000",
+                                    "statusDesc": "Successful"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payment/v1/pay/bill/favList": {
+            "get": {
+                "tags": [
+                    "payment/v1"
+                ],
+                "summary": "List favList",
+                "description": "Get a list of favList",
+                "operationId": "get_payment_favList_1",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "application/json"
+                    },
+                    {
+                        "name": "X-APP-PLATFORM",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "IOS"
+                    },
+                    {
+                        "name": "X-APP-VERSION",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0.9.38"
+                    },
+                    {
+                        "name": "X-APP-ENVIRONMENT",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "X-APP-BUILD-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1203"
+                    },
+                    {
+                        "name": "X-APP-RELEASE-NO",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "25.5.0"
+                    },
+                    {
+                        "name": "X-APP-SESSION-TRACE-ID",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    },
+                    {
+                        "name": "x-mb-client-adapter",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "mae-favorites-bill-payment-inquiry"
+                    },
+                    {
+                        "name": "X-MB-E2E-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "amI4ZUo4czNQQ1RjbnM3TVE0VGtHWVlubUZDWWtNdkI="
+                    },
+                    {
+                        "name": "X-MB-Timestamp",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1753471678391"
+                    },
+                    {
+                        "name": "X-MB-ENV",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "S"
+                    },
+                    {
+                        "name": "X-MB-Client-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "mae-fe-iv5p7"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_7"
+                                },
+                                "example": {
+                                    "selectedPageSize": 0,
+                                    "resultList": [
+                                        {
+                                            "oid": "9349",
+                                            "fullName": "Tenaga Nasional Berhad",
+                                            "shortName": "Tenaga Nasional Berhad",
+                                            "onlinePayment": "1",
+                                            "noteRequired": null,
+                                            "noteRequired2": null,
+                                            "noteRequired3": null,
+                                            "billAcctDispNameRequired": "0",
+                                            "billAcctDispName": "Bill Account No",
+                                            "billRefDispNameRequired": "1",
+                                            "billRefDispName": "IC No.",
+                                            "billRefRequired": "1",
+                                            "billAcctRequired": "0",
+                                            "creditCardPayment": "0",
+                                            "minPayment": "0",
+                                            "minPaymentAmount": "1",
+                                            "maxPayment": "0",
+                                            "maxPaymentAmount": "100000",
+                                            "typeOfPayment": "5",
+                                            "minCreditCardPayment": null,
+                                            "maxCreditCardPayment": null,
+                                            "effectiveDate": "0",
+                                            "billAcctHolderDispNameReq": "1",
+                                            "billAccHolderName": null,
+                                            "serialNoIndicator": "1",
+                                            "serialNoName": null,
+                                            "rechargeCodeIndicator": "1",
+                                            "rechargeCodeName": null,
+                                            "payeeCode": "1111",
+                                            "pnPayeeIp": null,
+                                            "pnPriority": null,
+                                            "pnEstatus": "1",
+                                            "pnPayeeEmail1": null,
+                                            "pnPayeeEmail2": null,
+                                            "authenticationRequired": "1",
+                                            "tacRequired": "0",
+                                            "returnedLink": "1",
+                                            "payeeUrl": null,
+                                            "billRef2Required": "0",
+                                            "billRef2DispNameRequired": "0",
+                                            "billRef2DispName": "Contract No.",
+                                            "recurringIndicator": "0",
+                                            "downtimeBit": "1",
+                                            "downtimeMessage": "Dear valued customers,\r\nPlease be informed that our TNB service is currently not available due to system maintenance.\r\nWe will endeavour to minimise the duration of unavailability of this service and would like to apologise in advance should you encounter any inconvenience.\r\nWe take this opportunity to thank you for your understanding and patience.\r\nShould you require any assistance, please contact our Maybank Group Customer Care at 1-300 88 6688.",
+                                            "downStartDate": "Fri Mar 26 23:00:00 MYT 2021",
+                                            "downEndDate": "Sat Mar 27 06:00:00 MYT 2021",
+                                            "image": "111.jpg",
+                                            "ebpp": "1",
+                                            "payHist": "1",
+                                            "acctId": "210027549604",
+                                            "billerCode": null,
+                                            "billerName": null,
+                                            "billRef1": null,
+                                            "billRef2": null,
+                                            "acctHolderName": null,
+                                            "paybill": true,
+                                            "jompay": false,
+                                            "imageName": "111.png",
+                                            "imageUrl": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/111.png",
+                                            "mbbAccountName": "Tenaga Nasional Berhad"
+                                        }
+                                    ],
+                                    "startPage": 0,
+                                    "endPage": 0,
+                                    "resultCount": 1,
+                                    "totalPage": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "pay_payeeInquiry_body": {
+                "required": [
+                    "billAcctNo",
+                    "payeeCode"
+                ],
+                "type": "object",
+                "properties": {
+                    "billAcctNo": {
+                        "type": "string",
+                        "example": "0176159404"
+                    },
+                    "payeeCode": {
+                        "type": "string",
+                        "example": "1LT1"
+                    }
+                }
+            },
+            "paymentv1paybill_mobileSDKData_geoLocationInfo": {
+                "required": [
+                    "HorizontalAccuracy",
+                    "Latitude",
+                    "Longitude",
+                    "Status",
+                    "Timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "Latitude": {
+                        "type": "string",
+                        "example": "3.1532956"
+                    },
+                    "Longitude": {
+                        "type": "string",
+                        "example": "101.70519508"
+                    },
+                    "Status": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "Timestamp": {
+                        "type": "string",
+                        "example": "1753471277976"
+                    },
+                    "HorizontalAccuracy": {
+                        "type": "string",
+                        "example": "20.12193885"
+                    }
+                }
+            },
+            "inline_response_200_5_resultList": {
+                "required": [
+                    "acctId",
+                    "authenticationRequired",
+                    "bilAcctDispName",
+                    "billAcctDispNameRequired",
+                    "billAcctHolderDispNameReq",
+                    "billAcctRequired",
+                    "billRef2DispNameRequired",
+                    "billRef2Required",
+                    "billRefDispName",
+                    "billRefDispNameRequired",
+                    "billRefRequired",
+                    "creditCardPayment",
+                    "downtimeBit",
+                    "effectiveDate",
+                    "fullName",
+                    "imageName",
+                    "imageUrl",
+                    "jompay",
+                    "maxPayment",
+                    "maxPaymentAmount",
+                    "mbbAccountName",
+                    "minPayment",
+                    "oid",
+                    "onlinePayment",
+                    "paybill",
+                    "payeeCode",
+                    "pnEstatus",
+                    "rechargeCodeIndicator",
+                    "recurringIndicator",
+                    "returnedLink",
+                    "serialNoIndicator",
+                    "shortName",
+                    "tacRequired",
+                    "typeOfPayment"
+                ],
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string",
+                        "example": "94478"
+                    },
+                    "fullName": {
+                        "type": "string",
+                        "example": "MAIPs - Perlis"
+                    },
+                    "shortName": {
+                        "type": "string",
+                        "example": "MAIPs - Perlis"
+                    },
+                    "onlinePayment": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "noteRequired": {
+                        "type": "string"
+                    },
+                    "noteRequired2": {
+                        "type": "string"
+                    },
+                    "noteRequired3": {
+                        "type": "string"
+                    },
+                    "billAcctDispNameRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "bilAcctDispName": {
+                        "type": "string",
+                        "example": "Telephone No."
+                    },
+                    "billRefDispNameRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billRefDispName": {
+                        "type": "string",
+                        "example": "Type Of Zakat"
+                    },
+                    "billRefRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billAcctRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "creditCardPayment": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "minPayment": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "minPaymentAmount": {
+                        "type": "string"
+                    },
+                    "maxPayment": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "maxPaymentAmount": {
+                        "type": "string",
+                        "example": "100000"
+                    },
+                    "typeOfPayment": {
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "minCreditCardPayment": {
+                        "type": "string"
+                    },
+                    "maxCreditCardPament": {
+                        "type": "string"
+                    },
+                    "effectiveDate": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billAcctHolderDispNameReq": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billAccHolderName": {
+                        "type": "string"
+                    },
+                    "serialNoIndicator": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "serialNoName": {
+                        "type": "string"
+                    },
+                    "rechargeCodeIndicator": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "rechargeCodeName": {
+                        "type": "string"
+                    },
+                    "payeeCode": {
+                        "type": "string",
+                        "example": "1LT1"
+                    },
+                    "pnPayeeIp": {
+                        "type": "string"
+                    },
+                    "pnPriority": {
+                        "type": "string"
+                    },
+                    "pnEstatus": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "pnPayeeEmail1": {
+                        "type": "string"
+                    },
+                    "pnPayeeEmail2": {
+                        "type": "string"
+                    },
+                    "authenticationRequired": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "tacRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "returnedLink": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "payeeUrl": {
+                        "type": "string"
+                    },
+                    "billRef2Required": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billRef2DispNameRequired": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billRef2DispName": {
+                        "type": "string"
+                    },
+                    "recurringIndicator": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "downtimeBit": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "downtimeMessage": {
+                        "type": "string"
+                    },
+                    "downStartDate": {
+                        "type": "string"
+                    },
+                    "downEndDate": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "type": "string"
+                    },
+                    "ebpp": {
+                        "type": "string"
+                    },
+                    "payHist": {
+                        "type": "string"
+                    },
+                    "acctId": {
+                        "type": "string",
+                        "example": "0176159404"
+                    },
+                    "billerCode": {
+                        "type": "string"
+                    },
+                    "billerName": {
+                        "type": "string"
+                    },
+                    "billRef1": {
+                        "type": "string"
+                    },
+                    "billRef2": {
+                        "type": "string"
+                    },
+                    "acctHolderName": {
+                        "type": "string"
+                    },
+                    "paybill": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "jompay": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "imageName": {
+                        "type": "string",
+                        "example": "1LT.png"
+                    },
+                    "imageUrl": {
+                        "type": "string",
+                        "example": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/1LT.png"
+                    },
+                    "mbbAccountName": {
+                        "type": "string",
+                        "example": "Zakat Emas"
+                    }
+                }
+            },
+            "inline_response_200_6_payeeList": {
+                "required": [
+                    "acctHolderName",
+                    "billRef1",
+                    "billRef2",
+                    "billerCode",
+                    "billerName"
+                ],
+                "type": "object",
+                "properties": {
+                    "billerCode": {
+                        "type": "string",
+                        "example": "5454"
+                    },
+                    "billerName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BE"
+                    },
+                    "billRef1": {
+                        "type": "string",
+                        "example": "210027549604"
+                    },
+                    "billRef2": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "acctHolderName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BERHAD"
+                    }
+                }
+            },
+            "inline_response_200_5": {
+                "required": [
+                    "endPage",
+                    "resultCount",
+                    "resultList",
+                    "selectedPageSize",
+                    "startPage",
+                    "totalPage"
+                ],
+                "type": "object",
+                "properties": {
+                    "selectedPageSize": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "resultList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/inline_response_200_5_resultList"
+                        }
+                    },
+                    "startPage": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "endPage": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "resultCount": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "totalPage": {
+                        "type": "number",
+                        "example": 0
+                    }
+                }
+            },
+            "jompay_jompayPayment_body": {
+                "required": [
+                    "amount",
+                    "billRef1",
+                    "billRef2",
+                    "billerAccount",
+                    "billerCode",
+                    "billerCodeName",
+                    "billerName",
+                    "effectiveDate",
+                    "favLimitExceed",
+                    "fromAcctCode",
+                    "fromAcctNo",
+                    "fromAcctType",
+                    "mobileSDKData",
+                    "msic",
+                    "nbpsRef",
+                    "onUs",
+                    "routingCode",
+                    "rrnDynamic",
+                    "rtnRequired",
+                    "sig",
+                    "systemRef",
+                    "tac",
+                    "timestamp",
+                    "toAcctNo",
+                    "twoFAType",
+                    "type",
+                    "validateSig"
+                ],
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "billRef1": {
+                        "type": "string",
+                        "example": "210027549604"
+                    },
+                    "billRef2": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "billerAccount": {
+                        "type": "string",
+                        "example": "8010069888"
+                    },
+                    "billerCode": {
+                        "type": "string",
+                        "example": "5454"
+                    },
+                    "billerCodeName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BERHAD"
+                    },
+                    "billerName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BERHAD"
+                    },
+                    "effectiveDate": {
+                        "type": "string",
+                        "example": "00000000"
+                    },
+                    "fromAcctCode": {
+                        "type": "string",
+                        "example": "0Y"
+                    },
+                    "fromAcctNo": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "fromAcctType": {
+                        "type": "string",
+                        "example": "D"
+                    },
+                    "msic": {
+                        "type": "string",
+                        "example": "35102"
+                    },
+                    "nbpsRef": {
+                        "type": "string",
+                        "example": "C7Q3AE5B"
+                    },
+                    "payeeCode": {
+                        "type": "string"
+                    },
+                    "routingCode": {
+                        "type": "string",
+                        "example": "100002050"
+                    },
+                    "rrnDynamic": {
+                        "type": "string",
+                        "example": "N"
+                    },
+                    "rtnRequired": {
+                        "type": "string",
+                        "example": "Y"
+                    },
+                    "sig": {
+                        "type": "string",
+                        "example": "ETNPIM8BalSSZ4rkbrWKoU2Oc910Hijf7kldH3P983k="
+                    },
+                    "systemRef": {
+                        "type": "string",
+                        "example": "20250725-5454-C7Q3AE5B"
+                    },
+                    "tac": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "example": "2025-07-25:19:29:40"
+                    },
+                    "toAcctNo": {
+                        "type": "string",
+                        "example": "8010069888"
+                    },
+                    "validateSig": {
+                        "type": "string",
+                        "example": "ih0SxeR9ikno9YwuHQ2jKE7wN5Ef0j2el+++nkxkiT8="
+                    },
+                    "mobileSDKData": {
+                        "$ref": "#/components/schemas/paymentv1paybill_mobileSDKData"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "OPEN"
+                    },
+                    "onUs": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "twoFAType": {
+                        "type": "string",
+                        "example": "SECURE2U_PULL"
+                    },
+                    "favLimitExceed": {
+                        "type": "string",
+                        "example": "Y"
+                    }
+                }
+            },
+            "inline_response_200_6": {
+                "required": [
+                    "payeeList",
+                    "statusCode",
+                    "statusDesc"
+                ],
+                "type": "object",
+                "properties": {
+                    "payeeList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/inline_response_200_6_payeeList"
+                        }
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "statusDesc": {
+                        "type": "string",
+                        "example": "Successful"
+                    }
+                }
+            },
+            "inline_response_200_7_resultList": {
+                "required": [
+                    "acctId",
+                    "authenticationRequired",
+                    "billAcctDispName",
+                    "billAcctDispNameRequired",
+                    "billAcctHolderDispNameReq",
+                    "billAcctRequired",
+                    "billRef2DispName",
+                    "billRef2DispNameRequired",
+                    "billRef2Required",
+                    "billRefDispName",
+                    "billRefDispNameRequired",
+                    "billRefRequired",
+                    "creditCardPayment",
+                    "downEndDate",
+                    "downStartDate",
+                    "downtimeBit",
+                    "downtimeMessage",
+                    "ebpp",
+                    "effectiveDate",
+                    "fullName",
+                    "image",
+                    "imageName",
+                    "imageUrl",
+                    "jompay",
+                    "maxPayment",
+                    "maxPaymentAmount",
+                    "mbbAccountName",
+                    "minPayment",
+                    "minPaymentAmount",
+                    "oid",
+                    "onlinePayment",
+                    "payHist",
+                    "paybill",
+                    "payeeCode",
+                    "pnEstatus",
+                    "rechargeCodeIndicator",
+                    "recurringIndicator",
+                    "returnedLink",
+                    "serialNoIndicator",
+                    "shortName",
+                    "tacRequired",
+                    "typeOfPayment"
+                ],
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string",
+                        "example": "9349"
+                    },
+                    "fullName": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    },
+                    "shortName": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    },
+                    "onlinePayment": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "noteRequired": {
+                        "type": "string"
+                    },
+                    "noteRequired2": {
+                        "type": "string"
+                    },
+                    "noteRequired3": {
+                        "type": "string"
+                    },
+                    "billAcctDispNameRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billAcctDispName": {
+                        "type": "string",
+                        "example": "Bill Account No"
+                    },
+                    "billRefDispNameRequired": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billRefDispName": {
+                        "type": "string",
+                        "example": "IC No."
+                    },
+                    "billRefRequired": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billAcctRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "creditCardPayment": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "minPayment": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "minPaymentAmount": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "maxPayment": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "maxPaymentAmount": {
+                        "type": "string",
+                        "example": "100000"
+                    },
+                    "typeOfPayment": {
+                        "type": "string",
+                        "example": "5"
+                    },
+                    "minCreditCardPayment": {
+                        "type": "string"
+                    },
+                    "maxCreditCardPayment": {
+                        "type": "string"
+                    },
+                    "effectiveDate": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billAcctHolderDispNameReq": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billAccHolderName": {
+                        "type": "string"
+                    },
+                    "serialNoIndicator": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "serialNoName": {
+                        "type": "string"
+                    },
+                    "rechargeCodeIndicator": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "rechargeCodeName": {
+                        "type": "string"
+                    },
+                    "payeeCode": {
+                        "type": "string",
+                        "example": "1111"
+                    },
+                    "pnPayeeIp": {
+                        "type": "string"
+                    },
+                    "pnPriority": {
+                        "type": "string"
+                    },
+                    "pnEstatus": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "pnPayeeEmail1": {
+                        "type": "string"
+                    },
+                    "pnPayeeEmail2": {
+                        "type": "string"
+                    },
+                    "authenticationRequired": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "tacRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "returnedLink": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "payeeUrl": {
+                        "type": "string"
+                    },
+                    "billRef2Required": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billRef2DispNameRequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "billRef2DispName": {
+                        "type": "string",
+                        "example": "Contract No."
+                    },
+                    "recurringIndicator": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "downtimeBit": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "downtimeMessage": {
+                        "type": "string",
+                        "example": "Dear valued customers,\r\nPlease be informed that our TNB service is currently not available due to system maintenance.\r\nWe will endeavour to minimise the duration of unavailability of this service and would like to apologise in advance should you encounter any inconvenience.\r\nWe take this opportunity to thank you for your understanding and patience.\r\nShould you require any assistance, please contact our Maybank Group Customer Care at 1-300 88 6688."
+                    },
+                    "downStartDate": {
+                        "type": "string",
+                        "example": "Fri Mar 26 23:00:00 MYT 2021"
+                    },
+                    "downEndDate": {
+                        "type": "string",
+                        "example": "Sat Mar 27 06:00:00 MYT 2021"
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "111.jpg"
+                    },
+                    "ebpp": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "payHist": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "acctId": {
+                        "type": "string",
+                        "example": "210027549604"
+                    },
+                    "billerCode": {
+                        "type": "string"
+                    },
+                    "billerName": {
+                        "type": "string"
+                    },
+                    "billRef1": {
+                        "type": "string"
+                    },
+                    "billRef2": {
+                        "type": "string"
+                    },
+                    "acctHolderName": {
+                        "type": "string"
+                    },
+                    "paybill": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "jompay": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "imageName": {
+                        "type": "string",
+                        "example": "111.png"
+                    },
+                    "imageUrl": {
+                        "type": "string",
+                        "example": "https://maya.maybank2u.com.my/wallet/bankAndTelcoImages/avatar/billerImages/111.png"
+                    },
+                    "mbbAccountName": {
+                        "type": "string",
+                        "example": "Tenaga Nasional Berhad"
+                    }
+                }
+            },
+            "inline_response_200_7": {
+                "required": [
+                    "endPage",
+                    "resultCount",
+                    "resultList",
+                    "selectedPageSize",
+                    "startPage",
+                    "totalPage"
+                ],
+                "type": "object",
+                "properties": {
+                    "selectedPageSize": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "resultList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/inline_response_200_7_resultList"
+                        }
+                    },
+                    "startPage": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "endPage": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "resultCount": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "totalPage": {
+                        "type": "number",
+                        "example": 0
+                    }
+                }
+            },
+            "inline_response_200_4_paymentTypes": {
+                "required": [
+                    "code",
+                    "label",
+                    "zakatFlow"
+                ],
+                "type": "object",
+                "properties": {
+                    "zakatValues": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Zakat Pendapatan"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "01"
+                    },
+                    "zakatFlow": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                }
+            },
+            "paymentv1paybill_mobileSDKData": {
+                "required": [
+                    "appState",
+                    "compromised",
+                    "deviceDetail",
+                    "deviceId",
+                    "deviceModel",
+                    "deviceName",
+                    "devicePrint",
+                    "emulator",
+                    "geoLocationInfo",
+                    "hardwareID",
+                    "keyChainErrorOnRetrieve",
+                    "keyChainErrorOnStoring",
+                    "languages",
+                    "multitaskingSupported",
+                    "osId",
+                    "osType",
+                    "osVersion",
+                    "rsaKey",
+                    "screenSize",
+                    "sdkVersion",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "deviceDetail": {
+                        "type": "string",
+                        "example": "iOS"
+                    },
+                    "deviceId": {
+                        "type": "string",
+                        "example": "iPhone13,1"
+                    },
+                    "deviceModel": {
+                        "type": "string",
+                        "example": "iPhone 12 Mini"
+                    },
+                    "deviceName": {
+                        "type": "string",
+                        "example": "iPhone"
+                    },
+                    "devicePrint": {
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "osType": {
+                        "type": "string",
+                        "example": "ios"
+                    },
+                    "osVersion": {
+                        "type": "string",
+                        "example": "18.6"
+                    },
+                    "rsaKey": {
+                        "type": "string",
+                        "example": "EE410B1DEEAC9412045EA5E64A2FF3C8"
+                    },
+                    "hardwareID": {
+                        "type": "string",
+                        "example": "27DC6797-7DF2-4C47-AFDA-E47480606CE3"
+                    },
+                    "screenSize": {
+                        "type": "string",
+                        "example": "375 x 812"
+                    },
+                    "languages": {
+                        "type": "string",
+                        "example": "en-MY"
+                    },
+                    "multitaskingSupported": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "example": "2025-07-25T19:21:17Z"
+                    },
+                    "geoLocationInfo": {
+                        "$ref": "#/components/schemas/paymentv1paybill_mobileSDKData_geoLocationInfo"
+                    },
+                    "emulator": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "osId": {
+                        "type": "string",
+                        "example": "8BBF5C27-AAE4-4022-9C0F-33447F60BA9E"
+                    },
+                    "compromised": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "sdkVersion": {
+                        "type": "string",
+                        "example": "6.1.0"
+                    },
+                    "appState": {
+                        "type": "string",
+                        "example": "active"
+                    },
+                    "keyChainErrorOnStoring": {
+                        "type": "string",
+                        "example": "Success"
+                    },
+                    "keyChainErrorOnRetrieve": {
+                        "type": "string",
+                        "example": "Success"
+                    }
+                }
+            },
+            "inline_response_200_1": {
+                "required": [
+                    "statusCode",
+                    "statusDescription"
+                ],
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "statusDescription": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "additionalStatusDescription": {
+                        "type": "string"
+                    },
+                    "policyHolderName": {
+                        "type": "string"
+                    }
+                }
+            },
+            "jompay_inquiry_body": {
+                "required": [
+                    "amount",
+                    "billRef1",
+                    "billRef2",
+                    "billerCode",
+                    "fromAccountTypeInd"
+                ],
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "billerCode": {
+                        "type": "string",
+                        "example": "5454"
+                    },
+                    "billRef1": {
+                        "type": "string",
+                        "example": "210027549604"
+                    },
+                    "billRef2": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "fromAccountTypeInd": {
+                        "type": "string",
+                        "example": "D"
+                    }
+                }
+            },
+            "inline_response_200": {
+                "required": [
+                    "additionalStatus",
+                    "amount",
+                    "formattedTransactionRefNumber",
+                    "maskCardNo",
+                    "message",
+                    "onHold",
+                    "serverDate",
+                    "statusCode",
+                    "statusDescription",
+                    "toCardNo",
+                    "token",
+                    "transactionRefNumber"
+                ],
+                "type": "object",
+                "properties": {
+                    "transactionRefNumber": {
+                        "type": "string",
+                        "example": "MC11111183756252220M"
+                    },
+                    "serverDate": {
+                        "type": "string",
+                        "example": "26 Jul 2025, 03:30 AM"
+                    },
+                    "pollingToken": {
+                        "type": "string"
+                    },
+                    "pollingStart": {
+                        "type": "string"
+                    },
+                    "pollingStatus": {
+                        "type": "string"
+                    },
+                    "onHold": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "rsaStatus": {
+                        "type": "string"
+                    },
+                    "challenge": {
+                        "type": "string"
+                    },
+                    "formattedTransactionRefNumber": {
+                        "type": "string",
+                        "example": "756252220M"
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "statusDescription": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "additionalStatusDescription": {
+                        "type": "string"
+                    },
+                    "additionalStatus": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "toCardNo": {
+                        "type": "string",
+                        "example": "0176159404"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "token": {
+                        "type": "string",
+                        "example": "00000071766982300039624894323365"
+                    },
+                    "maskCardNo": {
+                        "type": "string",
+                        "example": "******9404"
+                    }
+                }
+            },
+            "inline_response_200_2": {
+                "required": [
+                    "additionalStatus",
+                    "formattedTransactionRefNumber",
+                    "fromAccountBalance",
+                    "onHold",
+                    "pollingStart",
+                    "pollingStatus",
+                    "pollingToken",
+                    "serverDate",
+                    "statusCode",
+                    "statusDescription",
+                    "transactionRefNumber"
+                ],
+                "type": "object",
+                "properties": {
+                    "transactionRefNumber": {
+                        "type": "string",
+                        "example": "MC11111183756242955M"
+                    },
+                    "serverDate": {
+                        "type": "string",
+                        "example": "26 Jul 2025, 3:29 AM"
+                    },
+                    "pollingToken": {
+                        "type": "string",
+                        "example": "00000071766982300039624893885215"
+                    },
+                    "pollingStart": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "pollingStatus": {
+                        "type": "string",
+                        "example": "Expired"
+                    },
+                    "onHold": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "rsaStatus": {
+                        "type": "string"
+                    },
+                    "challenge": {
+                        "type": "string"
+                    },
+                    "formattedTransactionRefNumber": {
+                        "type": "string",
+                        "example": "756242955M"
+                    },
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "statusDescription": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "additionalStatusDescription": {
+                        "type": "string"
+                    },
+                    "additionalStatus": {
+                        "type": "string",
+                        "example": "000"
+                    },
+                    "fromAccountBalance": {
+                        "type": "string",
+                        "example": "40404.0404"
+                    },
+                    "toAccountBalance": {
+                        "type": "string"
+                    },
+                    "recipientAccountBalance": {
+                        "type": "string"
+                    },
+                    "sendRcvId": {
+                        "type": "string"
+                    },
+                    "s2w": {
+                        "type": "string"
+                    },
+                    "merchantAppId": {
+                        "type": "string"
+                    },
+                    "merchantUrl": {
+                        "type": "string"
+                    },
+                    "bakongReferenceNo": {
+                        "type": "string"
+                    },
+                    "bakongPaymentDetails": {
+                        "type": "string"
+                    },
+                    "remittanceReferenceNo": {
+                        "type": "string"
+                    },
+                    "remittancePaymentDetails": {
+                        "type": "string"
+                    },
+                    "externalRefNo": {
+                        "type": "string"
+                    },
+                    "tempTransactionId": {
+                        "type": "string"
+                    },
+                    "transactionDigest": {
+                        "type": "string"
+                    },
+                    "paymentRefNo": {
+                        "type": "string"
+                    },
+                    "m2uAccountBalance": {
+                        "type": "string"
+                    }
+                }
+            },
+            "inline_response_200_3": {
+                "required": [
+                    "amount",
+                    "billerAccount",
+                    "billerCode",
+                    "billerCodeName",
+                    "billerName",
+                    "fromAcctType",
+                    "msic",
+                    "nbpsRef",
+                    "onUs",
+                    "routingCode",
+                    "rrnDynamic",
+                    "rtnRequired",
+                    "serviceFee",
+                    "serviceFeeText",
+                    "sig",
+                    "statusCode",
+                    "statusDesc",
+                    "systemRef",
+                    "timestamp",
+                    "validateSig"
+                ],
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "statusDesc": {
+                        "type": "string",
+                        "example": "Success"
+                    },
+                    "sig": {
+                        "type": "string",
+                        "example": "ETNPIM8BalSSZ4rkbrWKoU2Oc910Hijf7kldH3P983k="
+                    },
+                    "systemRef": {
+                        "type": "string",
+                        "example": "20250725-5454-C7Q3AE5B"
+                    },
+                    "payeeCode": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "example": "2025-07-25:19:29:47"
+                    },
+                    "nbpsRef": {
+                        "type": "string",
+                        "example": "C7Q3AE5B"
+                    },
+                    "billerName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BERHAD"
+                    },
+                    "billerCode": {
+                        "type": "string",
+                        "example": "5454"
+                    },
+                    "billerCodeName": {
+                        "type": "string",
+                        "example": "TENAGA NASIONAL BERHAD"
+                    },
+                    "billerAccount": {
+                        "type": "string",
+                        "example": "8010069888"
+                    },
+                    "routingCode": {
+                        "type": "string",
+                        "example": "100002050"
+                    },
+                    "msic": {
+                        "type": "string",
+                        "example": "35102"
+                    },
+                    "validateSig": {
+                        "type": "string",
+                        "example": "ih0SxeR9ikno9YwuHQ2jKE7wN5Ef0j2el+++nkxkiT8="
+                    },
+                    "rtnRequired": {
+                        "type": "string",
+                        "example": "Y"
+                    },
+                    "rrnDynamic": {
+                        "type": "string",
+                        "example": "N"
+                    },
+                    "onUs": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "amount": {
+                        "type": "string",
+                        "example": "1.00"
+                    },
+                    "fromAcctType": {
+                        "type": "string",
+                        "example": "D"
+                    },
+                    "serviceFee": {
+                        "type": "string",
+                        "example": "0.00"
+                    },
+                    "serviceFeeText": {
+                        "type": "string",
+                        "example": "Note: No service charge applicable for DuitNow-Instant Transfer. To ensure transaction is successful, the Beneficiary Account must be valid and Payment Type is accepted by the receiving bank."
+                    }
+                }
+            },
+            "inline_response_200_4": {
+                "required": [
+                    "paymentTypes",
+                    "statusCode",
+                    "statusDescription"
+                ],
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "string",
+                        "example": "0000"
+                    },
+                    "statusDescription": {
+                        "type": "string",
+                        "example": "Successful"
+                    },
+                    "paymentTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/inline_response_200_4_paymentTypes"
+                        }
+                    }
+                }
+            },
+            "pay_bill_body": {
+                "required": [
+                    "billAcctNo",
+                    "billRefNo",
+                    "currentTxnDate",
+                    "donation",
+                    "effectiveDateTime",
+                    "endDate",
+                    "favLimitExceed",
+                    "fromAccount",
+                    "fromAcctCode",
+                    "futureTxnDate",
+                    "mobileSDKData",
+                    "onlinePayment",
+                    "payeeCode",
+                    "payeeName",
+                    "startDate",
+                    "tac",
+                    "tacrequired",
+                    "transactionType",
+                    "transferAmount",
+                    "twoFAType",
+                    "type",
+                    "zakat",
+                    "zakatFitrah",
+                    "zakatType"
+                ],
+                "type": "object",
+                "properties": {
+                    "accountType": {
+                        "type": "string"
+                    },
+                    "billAcctNo": {
+                        "type": "string",
+                        "example": "0176159404"
+                    },
+                    "billRefNo": {
+                        "type": "string",
+                        "example": "01"
+                    },
+                    "effectiveDateTime": {
+                        "type": "string",
+                        "example": "00000000"
+                    },
+                    "fromAccount": {
+                        "type": "string",
+                        "example": "5140121213460000000"
+                    },
+                    "fromAcctCode": {
+                        "type": "string",
+                        "example": "0Y"
+                    },
+                    "onlinePayment": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "payeeCode": {
+                        "type": "string",
+                        "example": "1LT1"
+                    },
+                    "tacrequired": {
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "transactionType": {
+                        "type": "string",
+                        "example": "BILL_PAYMENT_OTP_FAV"
+                    },
+                    "transferAmount": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "tac": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "mobileSDKData": {
+                        "$ref": "#/components/schemas/paymentv1paybill_mobileSDKData"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "OPEN"
+                    },
+                    "zakat": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "donation": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "zakatFitrah": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "zakatType": {
+                        "type": "string",
+                        "example": "Zakat Pendapatan"
+                    },
+                    "payeeName": {
+                        "type": "string",
+                        "example": "MAIPs - Perlis"
+                    },
+                    "currentTxnDate": {
+                        "type": "string",
+                        "example": "00000000"
+                    },
+                    "futureTxnDate": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "twoFAType": {
+                        "type": "string",
+                        "example": "SECURE2U_PULL"
+                    },
+                    "favLimitExceed": {
+                        "type": "string",
+                        "example": "Y"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}

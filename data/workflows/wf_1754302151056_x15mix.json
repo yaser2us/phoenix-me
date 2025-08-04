@@ -1,0 +1,48 @@
+{
+  "id": "wf_1754302151056_x15mix",
+  "name": "Revolutionary Expense Tracking API",
+  "description": "AI-powered expense tracking with predictive analytics and proactive recommendations",
+  "steps": [
+    {
+      "operation": "get_banking_getBalance",
+      "parameters": {
+        "isFirstLoad": true
+      }
+    },
+    {
+      "operation": "get_pfm_weekly",
+      "parameters": {
+        "module": "spending"
+      }
+    },
+    {
+      "operation": "get_goal_goals"
+    },
+    {
+      "operation": "get_payment_favList_1"
+    },
+    {
+      "operation": "get_goal_booster"
+    }
+  ],
+  "tags": [
+    "expense_tracking",
+    "ai_powered",
+    "financial_intelligence"
+  ],
+  "userSaved": true,
+  "savedAt": "2025-08-04T10:09:11.056Z",
+  "metadata": {
+    "source": "user_explicit_save",
+    "tags": [
+      "ai-enhanced"
+    ],
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "7ec95ce1",
+      "metadata": "198748e7990"
+    }
+  },
+  "persistedAt": "2025-08-04T10:09:11.056Z",
+  "version": "1.0"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Test Workflow",
+  "description": "Test workflow to verify persistence",
+  "steps": [
+    {
+      "operation": "getCurrentWeather",
+      "parameters": {
+        "q": "Kuala Lumpur"
+      }
+    }
+  ],
+  "id": "wf_1754301960808_7j2bl26w",
+  "persistedAt": "2025-08-04T10:06:00.808Z",
+  "version": "1.0",
+  "metadata": {
+    "persistenceVersion": "1.0.0",
+    "checksums": {
+      "content": "1565ed31",
+      "metadata": "198748b9268"
+    },
+    "tags": []
+  }
+}
